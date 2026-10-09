@@ -1,0 +1,2323 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DIMAS - Pembiasaan Salat Fardu SD Negeri 1 Candi Mlarak Ponorogo</title>
+  <meta name="description" content="Aplikasi Web Edukatif DIMAS (Zuhur, Isya, Magrib, Asar, Subuh) untuk memantau pembiasaan salat fardu peserta didik SD Negeri 1 Candi, Kecamatan Mlarak, Kabupaten Ponorogo." />
+  <meta property="og:title" content="DIMAS - Pembiasaan Salat Fardu SDN 1 Candi" />
+  <meta property="og:description" content="Aplikasi pembiasaan ibadah salat fardu peserta didik SD Negeri 1 Candi dengan nuansa edukatif Islami yang ramah anak." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/jpeg" href="/logo_sdn_1_candi_sm.jpg" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            },
+            tealislami: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              200: '#99f6e4',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
+              900: '#134e4a',
+            },
+            emas: {
+              300: '#fde047',
+              400: '#facc15',
+              500: '#eab308',
+              600: '#ca8a04',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Nunito', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Google Font: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Latar Belakang Pola Geometris Islami Nusantara yang Lembut */
+    .bg-islamic-pattern {
+      background-color: #f6fcf8;
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(34, 197, 94, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 90%, rgba(13, 148, 136, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(234, 179, 8, 0.05) 0%, transparent 50%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l7.5 12.5L50 10l-2.5 12.5L60 30l-12.5 7.5L50 50l-12.5-2.5L30 60l-7.5-12.5L10 50l2.5-12.5L0 30l12.5-7.5L10 10l12.5 2.5z' fill='%2310b981' fill-opacity='0.035' fill-rule='evenodd'/%3E%3C/svg%3E");
+    }
+
+    /* Animasi Ayunan Lentera Islami */
+    @keyframes sway {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
+    .lantern-sway {
+      transform-origin: top center;
+      animation: sway 4s infinite ease-in-out;
+    }
+
+    /* Efek Berkelip Bintang */
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(0.9); }
+      50% { opacity: 0.9; transform: scale(1.15); }
+    }
+    .star-twinkle {
+      animation: twinkle 3s infinite ease-in-out;
+    }
+
+    /* Scrollbar */
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #a7f3d0;
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    /* Canvas Confetti */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body class="bg-islamic-pattern text-slate-800 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white relative overflow-x-hidden">
+
+  <!-- Canvas Animasi Perayaan / Confetti -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- Ornamen Lentera Gantung Islami di Sisi Atas (Kiri & Kanan) -->
+  <div class="absolute top-0 left-4 sm:left-12 pointer-events-none hidden sm:block z-30">
+    <div class="lantern-sway flex flex-col items-center">
+      <div class="w-0.5 h-10 bg-gradient-to-b from-emerald-800 to-amber-500"></div>
+      <div class="w-7 h-9 rounded-b-xl rounded-t-lg bg-gradient-to-b from-amber-400 to-emas-600 shadow-md flex items-center justify-center text-amber-100 text-xs border border-amber-300">
+        <i class="fa-solid fa-moon text-[10px]"></i>
+      </div>
+      <div class="w-1.5 h-2 bg-amber-600 rounded-b"></div>
+    </div>
+  </div>
+
+  <div class="absolute top-0 right-4 sm:right-12 pointer-events-none hidden sm:block z-30">
+    <div class="lantern-sway flex flex-col items-center" style="animation-delay: 1.5s;">
+      <div class="w-0.5 h-14 bg-gradient-to-b from-emerald-800 to-amber-500"></div>
+      <div class="w-6 h-8 rounded-b-xl rounded-t-lg bg-gradient-to-b from-tealislami-500 to-emerald-700 shadow-md flex items-center justify-center text-amber-200 text-xs border border-emerald-300">
+        <i class="fa-solid fa-star text-[9px]"></i>
+      </div>
+      <div class="w-1.5 h-2 bg-emerald-800 rounded-b"></div>
+    </div>
+  </div>
+
+  <!-- Top Navigation Bar dengan Ornamen Kubah Hijau Islami -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b-2 border-emerald-100 shadow-xs">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Logo SDN 1 Candi -->
+      <a href="javascript:void(0)" onclick="app.navTo('home')" class="flex items-center gap-3 group focus:outline-none">
+        <!-- Bingkai Logo Sekolah -->
+        <div class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-emerald-100 to-teal-50 p-1 border-2 border-emerald-300/80 shadow-xs flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+          <img src="/logo_sdn_1_candi_sm.jpg" onerror="this.src='/src/assets/images/logo_sdn_1_candi_1791527981004.jpg'" alt="Logo SDN 1 Candi Mlarak Ponorogo" class="w-full h-full object-contain drop-shadow-xs" />
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl sm:text-2xl font-black tracking-tight text-emerald-950 flex items-center gap-1.5">
+              <span>DIMAS</span>
+              <span class="text-amber-500 text-sm">✨</span>
+            </span>
+            <span class="text-[10px] sm:text-[11px] font-extrabold text-emerald-800 bg-emerald-100/90 px-2.5 py-0.5 rounded-full border border-emerald-300">
+              SDN 1 CANDI
+            </span>
+          </div>
+          <p class="text-[10px] sm:text-[11px] text-slate-500 font-semibold leading-none mt-1">
+            Zuhur · Isya · Magrib · Asar · Subuh <span class="hidden md:inline text-emerald-700">| Mlarak, Ponorogo</span>
+          </p>
+        </div>
+      </a>
+
+      <!-- Quick Nav & Actions -->
+      <div class="flex items-center gap-2">
+        <button onclick="app.openSheetGuideModal()" class="px-3 py-2 text-xs font-bold text-teal-900 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-xl transition-all shadow-2xs flex items-center gap-1.5" title="Panduan Integrasi Google Sheets">
+          <i class="fa-solid fa-file-shield text-emerald-600"></i>
+          <span class="hidden sm:inline">Panduan Sheets</span>
+        </button>
+
+        <div id="roleNavBadge" class="hidden items-center gap-2">
+          <button onclick="app.confirmSwitchRole()" class="px-3 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span class="hidden sm:inline">Ganti Peran</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Kontainer Utama -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col relative z-10">
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: HOME (PILIH PERAN / ROLE SELECTOR) -->
+    <!-- ========================================== -->
+    <section id="view-home" class="space-y-8 my-auto py-4">
+      
+      <!-- Banner Sambutan Islami Edukatif & Ceria -->
+      <div class="relative bg-gradient-to-br from-emerald-800 via-tealislami-800 to-emerald-950 rounded-3xl p-6 sm:p-10 text-white shadow-xl overflow-hidden border-2 border-emerald-600/40">
+        
+        <!-- Ornamen Silhouette Masjid & Bintang di Background Banner -->
+        <div class="absolute -right-10 -bottom-8 opacity-15 pointer-events-none text-white text-9xl">
+          <i class="fa-solid fa-mosque"></i>
+        </div>
+        <div class="absolute top-4 right-16 text-amber-300 text-lg star-twinkle pointer-events-none">✦</div>
+        <div class="absolute top-12 right-36 text-amber-200 text-sm star-twinkle pointer-events-none" style="animation-delay: 1s;">✦</div>
+        <div class="absolute bottom-6 left-12 text-emerald-300 text-xs star-twinkle pointer-events-none">✦</div>
+
+        <div class="relative z-10 max-w-3xl space-y-4">
+          <!-- Kop Lembaga SD Negeri 1 Candi -->
+          <div class="flex items-center gap-3 flex-wrap">
+            <div class="w-12 h-12 p-1 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0">
+              <img src="/logo_sdn_1_candi_sm.jpg" onerror="this.src='/src/assets/images/logo_sdn_1_candi_1791527981004.jpg'" alt="Logo SDN 1 Candi" class="w-full h-full object-contain" />
+            </div>
+            <div>
+              <span class="inline-block text-[11px] font-extrabold uppercase tracking-wider text-amber-300 bg-black/25 px-2.5 py-0.5 rounded-full border border-amber-400/40">
+                SD NEGERI 1 CANDI · MLARAK PONOROGO
+              </span>
+              <p class="text-xs text-emerald-200 font-medium">Pendidikan Agama Islam dan Budi Pekerti (PAI-BP)</p>
+            </div>
+          </div>
+
+          <!-- Judul Utama & Akronim DIMAS -->
+          <div class="space-y-1.5 pt-1">
+            <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white">
+              Ayo Biasakan Salat 5 Waktu Bersama <span class="text-amber-300 underline decoration-emerald-400 decoration-wavy decoration-2">DIMAS</span>! 🕌
+            </h1>
+            <p class="text-xs sm:text-sm text-emerald-100 leading-relaxed font-medium">
+              <span class="font-bold text-amber-200">D</span>huhur/Zuhur · <span class="font-bold text-amber-200">I</span>sya · <span class="font-bold text-amber-200">M</span>agrib · <span class="font-bold text-amber-200">A</span>sar · <span class="font-bold text-amber-200">S</span>ubuh — Pembiasaan salat fardu penuntun karakter anak saleh dan salehah di SD Negeri 1 Candi.
+            </p>
+          </div>
+
+          <!-- Badge Periode & Motivasi -->
+          <div class="flex flex-wrap items-center gap-2 pt-2">
+            <div class="text-xs font-bold text-emerald-950 bg-amber-300 px-3 py-1.5 rounded-xl shadow-xs flex items-center gap-1.5">
+              <i class="fa-regular fa-calendar-check text-emerald-800"></i>
+              <span>Periode: 1 Oktober 2026 – 31 Desember 2026</span>
+            </div>
+            <div class="text-xs font-semibold text-emerald-100 bg-white/15 backdrop-blur-xs px-3 py-1.5 rounded-xl border border-white/20 flex items-center gap-1.5">
+              <i class="fa-solid fa-heart text-pink-300"></i>
+              <span>Salat Tepat Waktu, Hati Bahagia</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Widget Jadwal Salat Waktu Nyata Ponorogo dengan Visual Mihrab -->
+      <div class="bg-white rounded-3xl p-5 sm:p-6 border-2 border-emerald-100 shadow-md">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-emerald-50 gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-lg shadow-xs">
+              <i class="fa-solid fa-kaaba"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-base font-extrabold text-emerald-950">Jadwal Salat Ponorogo Hari Ini</h2>
+                <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-300">WIB</span>
+              </div>
+              <p class="text-xs text-slate-500 font-medium">Wilayah Kecamatan Mlarak & Kabupaten Ponorogo, Jawa Timur</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-start sm:self-auto">
+            <span id="homeCurrentClock" class="text-xs font-mono font-bold text-emerald-900 bg-emerald-100/80 px-3 py-1.5 rounded-xl border border-emerald-300 shadow-2xs">
+              --:--:-- WIB
+            </span>
+          </div>
+        </div>
+
+        <!-- 5 Waktu Salat Kartu Visual Anak -->
+        <div class="grid grid-cols-5 gap-2 sm:gap-3 text-center" id="homePrayerStrip">
+          <!-- Diisi otomatis oleh JavaScript -->
+          <div class="p-2 sm:p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200">
+            <span class="text-base sm:text-xl">🌅</span>
+            <p class="text-[10px] sm:text-xs font-bold text-emerald-800 uppercase mt-1">Subuh</p>
+            <p class="text-xs sm:text-sm font-extrabold text-slate-900">04:08</p>
+          </div>
+          <div class="p-2 sm:p-3 rounded-2xl bg-amber-50/80 border border-amber-200">
+            <span class="text-base sm:text-xl">☀️</span>
+            <p class="text-[10px] sm:text-xs font-bold text-amber-800 uppercase mt-1">Zuhur</p>
+            <p class="text-xs sm:text-sm font-extrabold text-slate-900">11:32</p>
+          </div>
+          <div class="p-2 sm:p-3 rounded-2xl bg-orange-50/80 border border-orange-200">
+            <span class="text-base sm:text-xl">🌤️</span>
+            <p class="text-[10px] sm:text-xs font-bold text-orange-800 uppercase mt-1">Asar</p>
+            <p class="text-xs sm:text-sm font-extrabold text-slate-900">14:45</p>
+          </div>
+          <div class="p-2 sm:p-3 rounded-2xl bg-rose-50/80 border border-rose-200">
+            <span class="text-base sm:text-xl">🌇</span>
+            <p class="text-[10px] sm:text-xs font-bold text-rose-800 uppercase mt-1">Magrib</p>
+            <p class="text-xs sm:text-sm font-extrabold text-slate-900">17:39</p>
+          </div>
+          <div class="p-2 sm:p-3 rounded-2xl bg-indigo-50/80 border border-indigo-200">
+            <span class="text-base sm:text-xl">🌙</span>
+            <p class="text-[10px] sm:text-xs font-bold text-indigo-800 uppercase mt-1">Isya</p>
+            <p class="text-xs sm:text-sm font-extrabold text-slate-900">18:49</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pilihan Peran Ramah Anak Sekolah Dasar -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+        <!-- Option A: Murid -->
+        <div onclick="app.selectRole('student')" class="group relative bg-white hover:bg-emerald-50/60 rounded-3xl p-6 sm:p-7 border-2 border-emerald-300 hover:border-emerald-600 shadow-md hover:shadow-xl cursor-pointer transition-all duration-200 flex flex-col justify-between overflow-hidden">
+          <div class="space-y-4 relative z-10">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center text-3xl shadow-md group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-child-reaching"></i>
+            </div>
+            <div>
+              <div class="flex items-center justify-between">
+                <h3 class="text-xl sm:text-2xl font-black text-slate-900 group-hover:text-emerald-800 transition-colors">
+                  Masuk sebagai Murid
+                </h3>
+                <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm group-hover:translate-x-1 transition-transform">
+                  <i class="fa-solid fa-arrow-right"></i>
+                </span>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+                Catat 5 waktu salat fardumu hari ini, kumpulkan bintang emas kebaikan, dan raih rida Allah SWT!
+              </p>
+            </div>
+          </div>
+          <div class="mt-6 pt-4 border-t border-emerald-100 flex items-center justify-between text-xs font-bold text-emerald-800">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-star text-amber-500"></i>
+              <span>Siswa SDN 1 Candi (Kelas 1–6)</span>
+            </span>
+            <span class="text-emerald-600 font-extrabold group-hover:underline">Mulai Catat &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Option B: Guru / Admin -->
+        <div onclick="app.openTeacherLoginModal()" class="group relative bg-white hover:bg-teal-50/60 rounded-3xl p-6 sm:p-7 border-2 border-slate-300 hover:border-tealislami-600 shadow-md hover:shadow-xl cursor-pointer transition-all duration-200 flex flex-col justify-between overflow-hidden">
+          <div class="space-y-4 relative z-10">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-teal-700 to-emerald-700 text-white flex items-center justify-center text-3xl shadow-md group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-chalkboard-user"></i>
+            </div>
+            <div>
+              <div class="flex items-center justify-between">
+                <h3 class="text-xl sm:text-2xl font-black text-slate-900 group-hover:text-tealislami-800 transition-colors">
+                  Masuk sebagai Guru / Admin
+                </h3>
+                <span class="w-8 h-8 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center text-sm group-hover:translate-x-1 transition-transform">
+                  <i class="fa-solid fa-lock"></i>
+                </span>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+                Pantau rekapitulasi keaktifan ibadah salat siswa SDN 1 Candi, evaluasi perkembangan kelas, dan ekspor data ke Excel.
+              </p>
+            </div>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-teal-800">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-shield-halved text-teal-600"></i>
+              <span>Guru PAI & Budi Pekerti (PIN: 123456)</span>
+            </span>
+            <span class="text-teal-700 font-extrabold group-hover:underline">Buka Portal &rarr;</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: FORM IDENTITAS MURID -->
+    <!-- ========================================== -->
+    <section id="view-student-identity" class="hidden max-w-xl mx-auto w-full my-auto py-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-emerald-200 shadow-lg space-y-6">
+        
+        <!-- Header Identitas dengan Logo SDN 1 Candi -->
+        <div class="text-center space-y-2">
+          <div class="w-18 h-18 mx-auto p-1.5 rounded-2xl bg-emerald-50 border-2 border-emerald-300 shadow-xs flex items-center justify-center">
+            <img src="/logo_sdn_1_candi_sm.jpg" onerror="this.src='/src/assets/images/logo_sdn_1_candi_1791527981004.jpg'" alt="Logo SDN 1 Candi" class="w-full h-full object-contain" />
+          </div>
+          <div>
+            <span class="inline-block text-[11px] font-extrabold text-emerald-800 bg-emerald-100 px-3 py-0.5 rounded-full uppercase tracking-wider mb-1">
+              SD Negeri 1 Candi Mlarak
+            </span>
+            <h2 class="text-2xl font-black text-emerald-950">Identitas Peserta Didik</h2>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-500">Yuk isi identitas Ananda sebelum mulai mencatat pembiasaan salat fardu hari ini!</p>
+        </div>
+
+        <form id="studentIdForm" onsubmit="app.handleStudentIdentitySubmit(event)" class="space-y-5">
+          <!-- Nama Lengkap -->
+          <div>
+            <label for="studentNameInput" class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+              Nama Lengkap Siswa <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-emerald-600">
+                <i class="fa-regular fa-user"></i>
+              </span>
+              <input type="text" id="studentNameInput" required placeholder="Contoh: Muhammad Faiz Al-Farizi"
+                class="w-full pl-10 pr-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-3 focus:ring-emerald-100 text-sm font-semibold text-slate-900 placeholder:text-slate-400 transition-all" />
+            </div>
+          </div>
+
+          <!-- Pilihan Kelas -->
+          <div>
+            <label for="studentClassSelect" class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+              Kelas di SDN 1 Candi <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-emerald-600">
+                <i class="fa-solid fa-graduation-cap"></i>
+              </span>
+              <select id="studentClassSelect" required
+                class="w-full pl-10 pr-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-3 focus:ring-emerald-100 text-sm font-semibold text-slate-900 bg-white transition-all">
+                <option value="" disabled selected>Pilih Kelas Anda...</option>
+                <option value="Kelas 1">Kelas 1 SDN 1 Candi</option>
+                <option value="Kelas 2">Kelas 2 SDN 1 Candi</option>
+                <option value="Kelas 3">Kelas 3 SDN 1 Candi</option>
+                <option value="Kelas 4">Kelas 4 SDN 1 Candi</option>
+                <option value="Kelas 5">Kelas 5 SDN 1 Candi</option>
+                <option value="Kelas 6">Kelas 6 SDN 1 Candi</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Jenis Kelamin -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
+              Jenis Kelamin <span class="text-red-500">*</span>
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="relative flex items-center gap-3 p-3.5 rounded-2xl border-2 border-slate-200 cursor-pointer hover:bg-emerald-50/60 has-checked:border-emerald-600 has-checked:bg-emerald-50 transition-all">
+                <input type="radio" name="gender" value="Laki-laki" checked class="accent-emerald-600 w-4 h-4" />
+                <span class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <span class="text-lg">👦</span> Laki-laki
+                </span>
+              </label>
+
+              <label class="relative flex items-center gap-3 p-3.5 rounded-2xl border-2 border-slate-200 cursor-pointer hover:bg-pink-50/60 has-checked:border-pink-500 has-checked:bg-pink-50 transition-all">
+                <input type="radio" name="gender" value="Perempuan" class="accent-pink-600 w-4 h-4" />
+                <span class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <span class="text-lg">👧</span> Perempuan
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pt-2 flex items-center gap-3">
+            <button type="button" onclick="app.navTo('home')" class="w-1/3 py-3 px-4 rounded-2xl border-2 border-slate-200 font-bold text-slate-600 hover:bg-slate-100 text-sm transition-colors">
+              Kembali
+            </button>
+            <button type="submit" class="w-2/3 py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+              <span>Mulai Catat Salat</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 3: DASHBOARD PESERTA DIDIK (SISWA)    -->
+    <!-- ========================================== -->
+    <section id="view-student-dashboard" class="hidden space-y-6">
+
+      <!-- Header Sapaan & Kartu Murid SDN 1 Candi -->
+      <div class="bg-gradient-to-br from-emerald-800 via-tealislami-800 to-emerald-950 rounded-3xl p-6 sm:p-7 text-white shadow-lg relative overflow-hidden border-2 border-emerald-600/40">
+        
+        <!-- Ornamen Kubah & Bintang -->
+        <div class="absolute -right-6 -bottom-6 opacity-15 pointer-events-none text-9xl text-white">
+          <i class="fa-solid fa-mosque"></i>
+        </div>
+
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex items-start sm:items-center gap-3.5 sm:gap-4">
+            <!-- Logo SDN 1 Candi di Kartu Siswa -->
+            <div class="w-14 h-14 sm:w-16 sm:h-16 p-1.5 rounded-2xl bg-white shadow-md flex items-center justify-center shrink-0 border border-emerald-300">
+              <img src="/logo_sdn_1_candi_sm.jpg" onerror="this.src='/src/assets/images/logo_sdn_1_candi_1791527981004.jpg'" alt="Logo SDN 1 Candi" class="w-full h-full object-contain" />
+            </div>
+
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-400 text-emerald-950 flex items-center gap-1 shadow-xs">
+                  <i class="fa-solid fa-school text-emerald-900"></i>
+                  <span>SDN 1 Candi</span>
+                </span>
+                <span class="text-[10px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/20 text-emerald-100 flex items-center gap-1">
+                  <span id="headerStudentClass">Kelas --</span>
+                </span>
+                <span id="headerStudentGenderBadge" class="text-xs font-bold text-amber-200">👦 Siswa Muslim</span>
+              </div>
+              <h2 class="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white">
+                Assalamu'alaikum, <span id="headerStudentName" class="text-amber-300">Siswa Shalih</span>! 🌟
+              </h2>
+              <p id="studentMotivationalQuote" class="text-xs sm:text-sm text-emerald-100 max-w-2xl leading-relaxed font-medium">
+                "Salat adalah tiang agama. Barangsiapa mendirikannya, sungguh ia telah menegakkan agama." (HR. Baihaqi)
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 self-start md:self-auto shrink-0">
+            <button onclick="app.editStudentIdentity()" class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-colors flex items-center gap-2 border border-white/20">
+              <i class="fa-solid fa-user-pen"></i>
+              <span>Ganti Siswa</span>
+            </button>
+            <button onclick="app.navTo('home')" class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-colors flex items-center gap-2 border border-white/20">
+              <i class="fa-solid fa-house"></i>
+              <span class="hidden sm:inline">Beranda</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Widget Jadwal Salat Ponorogo (Real-Time) -->
+      <div class="bg-white rounded-3xl p-5 border-2 border-emerald-100 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-3 border-b border-emerald-50 gap-2">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-compass-drafting"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-800">Jadwal Waktu Salat Ponorogo (Kec. Mlarak)</h3>
+              <p class="text-[11px] text-slate-500 font-medium">Koordinat: -7.8680 LS, 111.4623 BT · Acuan Kemenag / Aladhan</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="prayerActiveStatusBadge" class="text-xs font-bold text-emerald-800 bg-emerald-100 px-3 py-1 rounded-xl border border-emerald-300">
+              Menghitung waktu...
+            </span>
+            <span id="studentDigitalClock" class="text-xs font-mono font-bold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-xl">
+              --:-- WIB
+            </span>
+          </div>
+        </div>
+
+        <!-- 5 Waktu Salat Widget -->
+        <div class="grid grid-cols-5 gap-2 sm:gap-3" id="studentPrayerTimesGrid">
+          <div class="p-2 sm:p-3 rounded-2xl bg-emerald-50/70 text-center border border-emerald-200">
+            <div class="text-[10px] sm:text-xs font-bold text-emerald-800 uppercase">Subuh</div>
+            <div class="text-xs sm:text-base font-black text-slate-900 mt-0.5" id="timeSubuh">04:08</div>
+          </div>
+          <div class="p-2 sm:p-3 rounded-2xl bg-amber-50/70 text-center border border-amber-200">
+            <div class="text-[10px] sm:text-xs font-bold text-amber-800 uppercase">Zuhur</div>
+            <div class="text-xs sm:text-base font-black text-slate-900 mt-0.5" id="timeZuhur">11:32</div>
+          </div>
+          <div class="p-2 sm:p-3 rounded-2xl bg-orange-50/70 text-center border border-orange-200">
+            <div class="text-[10px] sm:text-xs font-bold text-orange-800 uppercase">Asar</div>
+            <div class="text-xs sm:text-base font-black text-slate-900 mt-0.5" id="timeAsar">14:45</div>
+          </div>
+          <div class="p-2 sm:p-3 rounded-2xl bg-rose-50/70 text-center border border-rose-200">
+            <div class="text-[10px] sm:text-xs font-bold text-rose-800 uppercase">Magrib</div>
+            <div class="text-xs sm:text-base font-black text-slate-900 mt-0.5" id="timeMagrib">17:39</div>
+          </div>
+          <div class="p-2 sm:p-3 rounded-2xl bg-indigo-50/70 text-center border border-indigo-200">
+            <div class="text-[10px] sm:text-xs font-bold text-indigo-800 uppercase">Isya</div>
+            <div class="text-xs sm:text-base font-black text-slate-900 mt-0.5" id="timeIsya">18:49</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORM PENGISIAN SALAT HARIAN -->
+      <form id="dailyPrayerForm" onsubmit="app.handleSavePrayerReport(event)" class="space-y-6">
+
+        <!-- Baris Pengaturan Tanggal & Opsi Haiz -->
+        <div class="bg-white rounded-3xl p-5 border-2 border-emerald-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <!-- Date Picker dengan Batasan 1 Okt - 31 Des 2026 -->
+          <div class="flex-1">
+            <label for="prayerDateInput" class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <i class="fa-regular fa-calendar text-emerald-600"></i>
+              <span>Pilih Tanggal Pengisian Salat:</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <input type="date" id="prayerDateInput" required
+                min="2026-10-01" max="2026-12-31"
+                onchange="app.onDateChanged(this.value)"
+                class="w-full sm:w-auto px-4 py-2.5 rounded-2xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-3 focus:ring-emerald-100 text-sm font-bold text-slate-800" />
+              <span class="text-xs font-bold text-emerald-900 bg-emerald-100 border border-emerald-300 px-3 py-2 rounded-2xl whitespace-nowrap shadow-2xs">
+                Periode Okt–Des 2026
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1 font-medium">Batas program pembiasaan: 1 Oktober 2026 s/d 31 Desember 2026.</p>
+          </div>
+
+          <!-- Opsi Khusus Siswi Perempuan (Haiz) -->
+          <div id="femaleSpecialOption" class="hidden md:border-l md:border-slate-200 md:pl-5">
+            <label class="flex items-start gap-3 p-3.5 rounded-2xl bg-purple-50 border-2 border-purple-200 cursor-pointer hover:bg-purple-100/60 transition-colors">
+              <input type="checkbox" id="haizCheckbox" onchange="app.toggleHaizStatus(this.checked)" class="mt-0.5 accent-purple-600 w-4 h-4 rounded" />
+              <div>
+                <span class="text-xs font-bold text-purple-900 flex items-center gap-1.5">
+                  <span>🌸 Sedang Berhalangan / Haiz</span>
+                  <span class="text-[10px] bg-purple-200 text-purple-800 px-2 py-0.5 rounded-full font-bold">Dispensasi Syar'i</span>
+                </span>
+                <p class="text-[11px] text-purple-700 mt-0.5 leading-snug">
+                  Centang jika sedang berhalangan. Nilai tetap dihitung secara adil & syar'i.
+                </p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Banner Pemberitahuan jika Haiz Aktif -->
+        <div id="haizNoticeBanner" class="hidden bg-purple-50 border-2 border-purple-200 rounded-2xl p-4 text-purple-900 text-xs flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-purple-200 text-purple-800 flex items-center justify-center shrink-0 text-base">
+            <i class="fa-solid fa-heart"></i>
+          </div>
+          <div>
+            <p class="font-bold">Status: Ananda sedang berhalangan (haiz).</p>
+            <p class="text-purple-700">Tetap perbanyak zikir, doa harian, dan berbuat kebaikan membantu orang tua ya shalihah! 💖</p>
+          </div>
+        </div>
+
+        <!-- Meteran Kebaikan Bintang Emas (Star Progress Card) -->
+        <div class="bg-gradient-to-r from-amber-500 via-emas-500 to-amber-600 text-white rounded-3xl p-4 sm:p-5 shadow-md flex items-center justify-between border border-amber-300">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-2xl shadow-xs">
+              <i class="fa-solid fa-star text-amber-200"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-amber-100 uppercase tracking-wider">Perolehan Bintang Hari Ini</p>
+              <h4 class="text-xl sm:text-2xl font-black flex items-center gap-2">
+                <span id="liveTotalScore">0</span> / 15 Poin
+                <span id="liveScoreLabel" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-white/25">Belum Lengkap</span>
+              </h4>
+            </div>
+          </div>
+          <div class="text-right hidden sm:block">
+            <p class="text-xs font-bold text-amber-100">Status 5 Waktu Salat</p>
+            <p id="liveFilledCount" class="text-sm font-extrabold text-white">0 dari 5 Salat Dipilih</p>
+          </div>
+        </div>
+
+        <!-- DAFTAR 5 KARTU SALAT FARDU (DIMAS: Zuhur, Isya, Magrib, Asar, Subuh) -->
+        <div class="space-y-4" id="prayerCardsContainer">
+          <!-- Kartu salat di-render oleh JS -->
+        </div>
+
+        <!-- Catatan Tambahan (Opsional) -->
+        <div class="bg-white rounded-3xl p-5 border-2 border-emerald-100 shadow-sm">
+          <label for="studentNotesInput" class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <i class="fa-regular fa-comment-dots text-emerald-600"></i>
+            <span>Catatan Tambahan Hari Ini (Opsional)</span>
+          </label>
+          <textarea id="studentNotesInput" rows="2" placeholder="Contoh: Salat Subuh berjamaah di Musala Candi bersama Ayah, atau catatan lainnya..."
+            class="w-full p-3.5 rounded-2xl border-2 border-slate-200 focus:border-emerald-500 focus:ring-3 focus:ring-emerald-100 text-sm font-medium text-slate-800 placeholder:text-slate-400 transition-all"></textarea>
+          <p class="text-[11px] text-slate-400 mt-1.5">Tuliskan jika ada kegiatan ibadah khusus atau masjid tempat berjamaah.</p>
+        </div>
+
+        <!-- Tombol Simpan Laporan Utama -->
+        <div class="pt-2">
+          <button type="submit" id="btnSaveReport" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 via-tealislami-600 to-emerald-700 hover:from-emerald-700 hover:to-tealislami-700 text-white font-black text-base sm:text-lg shadow-lg hover:shadow-xl transition-all transform active:scale-[0.99] flex items-center justify-center gap-3">
+            <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+            <span>Simpan Laporan Hari Ini</span>
+          </button>
+        </div>
+
+      </form>
+
+      <!-- Riwayat Laporan Singkat Siswa -->
+      <div class="bg-white rounded-3xl p-5 border-2 border-slate-200/80 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i>
+            <span>Riwayat Laporan Ananda (Tersimpan di Perangkat)</span>
+          </h3>
+          <span id="studentHistoryCountBadge" class="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">0 Laporan</span>
+        </div>
+        <div id="studentHistoryList" class="space-y-2 max-h-56 overflow-y-auto custom-scroll">
+          <div class="text-center py-4 text-xs text-slate-400">Belum ada riwayat pengisian untuk siswa ini.</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 4: DASHBOARD MONITORING GURU / ADMIN  -->
+    <!-- ========================================== -->
+    <section id="view-teacher-dashboard" class="hidden space-y-6">
+
+      <!-- Header Dashboard Guru dengan Logo SDN 1 Candi -->
+      <div class="bg-gradient-to-r from-tealislami-800 via-emerald-800 to-slate-900 rounded-3xl p-6 sm:p-7 text-white shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4 border-2 border-teal-600/40">
+        <div class="flex items-start sm:items-center gap-3.5 sm:gap-4">
+          <!-- Logo SDN 1 Candi di Dashboard Guru -->
+          <div class="w-14 h-14 sm:w-16 sm:h-16 p-1.5 rounded-2xl bg-white shadow-md flex items-center justify-center shrink-0 border border-teal-300">
+            <img src="/logo_sdn_1_candi_sm.jpg" onerror="this.src='/src/assets/images/logo_sdn_1_candi_1791527981004.jpg'" alt="Logo SDN 1 Candi" class="w-full h-full object-contain" />
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-black px-2.5 py-0.5 rounded-full bg-amber-400 text-emerald-950 flex items-center gap-1.5 shadow-2xs">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Portal Guru PAI & Budi Pekerti</span>
+              </span>
+              <span class="text-xs font-bold text-teal-200">SD Negeri 1 Candi · Mlarak Ponorogo</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black tracking-tight">Dashboard Monitoring Salat DIMAS</h2>
+            <p class="text-xs sm:text-sm text-teal-100">
+              Rekapitulasi dan evaluasi pembiasaan salat fardu peserta didik SD Negeri 1 Candi (1 Okt – 31 Des 2026).
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 self-start md:self-auto shrink-0">
+          <button onclick="app.exportToCSV()" class="px-3.5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-extrabold transition-all shadow-md flex items-center gap-2">
+            <i class="fa-solid fa-file-excel"></i>
+            <span>Ekspor Data (Excel/CSV)</span>
+          </button>
+          <button onclick="app.navTo('home')" class="px-3.5 py-2.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-colors flex items-center gap-2 border border-white/20">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span class="hidden sm:inline">Keluar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Jadwal Salat Ponorogo Strip di Dashboard Guru -->
+      <div class="bg-white rounded-2xl p-4 border-2 border-emerald-100 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-xs font-bold text-slate-700">
+          <i class="fa-solid fa-kaaba text-emerald-600"></i>
+          <span>Waktu Salat Ponorogo Hari Ini:</span>
+        </div>
+        <div class="grid grid-cols-5 gap-2 text-center text-xs" id="teacherPrayerTimesStrip">
+          <span class="bg-emerald-50 px-2 py-1 rounded-xl border border-emerald-200 font-bold text-emerald-900">Subuh 04:08</span>
+          <span class="bg-amber-50 px-2 py-1 rounded-xl border border-amber-200 font-bold text-amber-900">Zuhur 11:32</span>
+          <span class="bg-orange-50 px-2 py-1 rounded-xl border border-orange-200 font-bold text-orange-900">Asar 14:45</span>
+          <span class="bg-rose-50 px-2 py-1 rounded-xl border border-rose-200 font-bold text-rose-900">Magrib 17:39</span>
+          <span class="bg-indigo-50 px-2 py-1 rounded-xl border border-indigo-200 font-bold text-indigo-900">Isya 18:49</span>
+        </div>
+      </div>
+
+      <!-- Statistik Ringkas (KPI Cards) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total Laporan -->
+        <div class="bg-white rounded-3xl p-5 border-2 border-emerald-100 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase">Total Laporan</span>
+            <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-clipboard-list"></i>
+            </div>
+          </div>
+          <div class="mt-3">
+            <span id="statTotalReports" class="text-2xl sm:text-3xl font-black text-slate-900">0</span>
+            <span class="text-xs text-slate-400 ml-1">entri</span>
+          </div>
+          <p class="text-[11px] text-emerald-700 font-bold mt-1">
+            <i class="fa-solid fa-arrow-trend-up"></i> Terakumulasi SDN 1 Candi
+          </p>
+        </div>
+
+        <!-- Rata-rata Skor -->
+        <div class="bg-white rounded-3xl p-5 border-2 border-amber-100 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase">Rata-rata Poin</span>
+            <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-star"></i>
+            </div>
+          </div>
+          <div class="mt-3">
+            <span id="statAverageScore" class="text-2xl sm:text-3xl font-black text-slate-900">0.0</span>
+            <span class="text-xs text-slate-400 ml-1">/ 15</span>
+          </div>
+          <p class="text-[11px] text-slate-500 font-medium mt-1">Tingkat kepatuhan siswa</p>
+        </div>
+
+        <!-- Persentase Berjamaah -->
+        <div class="bg-white rounded-3xl p-5 border-2 border-teal-100 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase">Salat Berjamaah</span>
+            <div class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-users"></i>
+            </div>
+          </div>
+          <div class="mt-3">
+            <span id="statCongregationRate" class="text-2xl sm:text-3xl font-black text-slate-900">0%</span>
+          </div>
+          <p class="text-[11px] text-teal-700 font-bold mt-1">Dari total waktu salat</p>
+        </div>
+
+        <!-- Jumlah Siswa Terdata -->
+        <div class="bg-white rounded-3xl p-5 border-2 border-blue-100 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase">Siswa Terdata</span>
+            <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-user-graduate"></i>
+            </div>
+          </div>
+          <div class="mt-3">
+            <span id="statUniqueStudents" class="text-2xl sm:text-3xl font-black text-slate-900">0</span>
+            <span class="text-xs text-slate-400 ml-1">anak</span>
+          </div>
+          <p class="text-[11px] text-blue-700 font-bold mt-1">Kelas 1 s.d. Kelas 6</p>
+        </div>
+      </div>
+
+      <!-- Filter Controls & Actions Bar -->
+      <div class="bg-white rounded-3xl p-5 border-2 border-slate-200/90 shadow-xs space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-filter text-emerald-600"></i>
+            <span>Filter Data Rekapitulasi SDN 1 Candi</span>
+          </h3>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="app.populateDemoData()" class="px-3 py-1.5 text-xs font-bold text-emerald-900 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 rounded-xl transition-colors flex items-center gap-1.5">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>Isi Data Demo</span>
+            </button>
+            <button onclick="app.confirmClearAllData()" class="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-colors flex items-center gap-1.5">
+              <i class="fa-solid fa-trash-can"></i>
+              <span>Hapus Semua</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <!-- Filter Kelas -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Pilih Kelas</label>
+            <select id="filterClassSelect" onchange="app.renderTeacherTable()" class="w-full px-3.5 py-2.5 rounded-2xl border-2 border-slate-200 text-xs font-bold text-slate-800 bg-white focus:ring-3 focus:ring-emerald-100">
+              <option value="ALL">Semua Kelas (1–6)</option>
+              <option value="Kelas 1">Kelas 1</option>
+              <option value="Kelas 2">Kelas 2</option>
+              <option value="Kelas 3">Kelas 3</option>
+              <option value="Kelas 4">Kelas 4</option>
+              <option value="Kelas 5">Kelas 5</option>
+              <option value="Kelas 6">Kelas 6</option>
+            </select>
+          </div>
+
+          <!-- Filter Tanggal (Okt-Des 2026) -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter Tanggal Spesifik</label>
+            <input type="date" id="filterDateInput" min="2026-10-01" max="2026-12-31" onchange="app.renderTeacherTable()"
+              class="w-full px-3.5 py-2.5 rounded-2xl border-2 border-slate-200 text-xs font-bold text-slate-800 focus:ring-3 focus:ring-emerald-100" />
+          </div>
+
+          <!-- Search Nama -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cari Nama Siswa</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </span>
+              <input type="text" id="filterSearchInput" oninput="app.renderTeacherTable()" placeholder="Ketik nama siswa..."
+                class="w-full pl-9 pr-3.5 py-2.5 rounded-2xl border-2 border-slate-200 text-xs font-medium text-slate-800 focus:ring-3 focus:ring-emerald-100" />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-slate-500 pt-1">
+          <span id="tableResultCountText" class="font-semibold">Menampilkan 0 data</span>
+          <button onclick="app.resetFilters()" class="text-emerald-700 hover:underline font-bold">
+            Reset Filter
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabel Rekapitulasi Pembiasaan Salat -->
+      <div class="bg-white rounded-3xl border-2 border-slate-200/90 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto custom-scroll">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-emerald-50/80 text-emerald-950 font-black uppercase tracking-wider border-b-2 border-emerald-100">
+                <th class="py-3.5 px-4 text-center">No</th>
+                <th class="py-3.5 px-4">Tanggal</th>
+                <th class="py-3.5 px-4">Nama Siswa</th>
+                <th class="py-3.5 px-3">Kelas</th>
+                <th class="py-3.5 px-3">L/P</th>
+                <th class="py-3.5 px-3 text-center">Subuh</th>
+                <th class="py-3.5 px-3 text-center">Zuhur</th>
+                <th class="py-3.5 px-3 text-center">Asar</th>
+                <th class="py-3.5 px-3 text-center">Magrib</th>
+                <th class="py-3.5 px-3 text-center">Isya</th>
+                <th class="py-3.5 px-4 text-center">Total Skor</th>
+                <th class="py-3.5 px-4">Catatan</th>
+                <th class="py-3.5 px-3 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="teacherTableBody" class="divide-y divide-slate-100 font-medium">
+              <!-- Render otomatis baris tabel -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State jika tabel kosong -->
+        <div id="teacherTableEmpty" class="hidden p-10 text-center space-y-3">
+          <div class="w-14 h-14 mx-auto rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-2xl">
+            <i class="fa-solid fa-inbox"></i>
+          </div>
+          <p class="text-sm font-bold text-slate-700">Tidak ada data laporan yang cocok.</p>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto">
+            Gunakan filter lain, klik "Isi Data Demo" untuk uji coba, atau minta siswa mengisi formulir.
+          </p>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer Edukatif Islami SDN 1 Candi -->
+  <footer class="bg-white/95 border-t-2 border-emerald-100 py-6 px-4 mt-auto relative z-10">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
+      <div class="flex items-center gap-3">
+        <img src="/logo_sdn_1_candi_sm.jpg" onerror="this.src='/src/assets/images/logo_sdn_1_candi_1791527981004.jpg'" alt="Logo SDN 1 Candi" class="w-8 h-8 object-contain" />
+        <div>
+          <span class="font-black text-emerald-950">SD NEGERI 1 CANDI</span>
+          <span>·</span>
+          <span>Kecamatan Mlarak, Kabupaten Ponorogo</span>
+        </div>
+      </div>
+      <div class="font-semibold text-emerald-800">
+        <span>Mata Pelajaran PAI dan Budi Pekerti · Periode Program 1 Okt – 31 Des 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================== -->
+  <!-- MODAL 1: LOGIN GURU (PIN: 123456)          -->
+  <!-- ========================================== -->
+  <div id="modalTeacherLogin" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border-2 border-emerald-100 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+      <div class="text-center space-y-2">
+        <div class="w-16 h-16 mx-auto p-1.5 rounded-2xl bg-emerald-50 border-2 border-teal-300 shadow-xs flex items-center justify-center">
+          <img src="/logo_sdn_1_candi_sm.jpg" onerror="this.src='/src/assets/images/logo_sdn_1_candi_1791527981004.jpg'" alt="Logo SDN 1 Candi" class="w-full h-full object-contain" />
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-slate-900">Portal Guru PAI & BP</h3>
+          <p class="text-xs font-bold text-emerald-800">SD Negeri 1 Candi Mlarak</p>
+        </div>
+        <p class="text-xs text-slate-500">Masukkan PIN Keamanan untuk membuka dashboard monitoring.</p>
+      </div>
+
+      <form id="teacherLoginForm" onsubmit="app.handleTeacherLoginSubmit(event)" class="space-y-4">
+        <div>
+          <label for="teacherPinInput" class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1">
+            PIN Guru
+          </label>
+          <div class="relative">
+            <input type="password" id="teacherPinInput" required maxlength="10" placeholder="Masukkan PIN..."
+              class="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-teal-600 focus:ring-3 focus:ring-teal-100 text-center text-lg font-mono tracking-widest text-slate-800" />
+            <button type="button" onclick="app.togglePinVisibility()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+              <i id="pinToggleIcon" class="fa-solid fa-eye text-xs"></i>
+            </button>
+          </div>
+          <p id="loginErrorMsg" class="text-[11px] text-rose-600 font-bold mt-1 hidden"></p>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-amber-50 border-2 border-amber-200 text-[11px] text-amber-950 flex items-center gap-2">
+          <i class="fa-solid fa-key text-amber-600 text-sm"></i>
+          <span>PIN Demo Pengujian: <strong class="font-mono font-extrabold text-xs">123456</strong></span>
+        </div>
+
+        <div class="flex items-center gap-2.5 pt-1">
+          <button type="button" onclick="app.closeTeacherLoginModal()" class="w-1/2 py-3 rounded-2xl border-2 border-slate-200 font-bold text-slate-600 hover:bg-slate-100 text-xs transition-colors">
+            Batal
+          </button>
+          <button type="submit" class="w-1/2 py-3 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-black text-xs shadow-md transition-all">
+            Masuk
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL 2: APRESIASI ISLAMI (SUKSES SIMPAN)  -->
+  <!-- ========================================== -->
+  <div id="modalAppreciation" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border-2 border-emerald-200 space-y-5 text-center">
+      <!-- Icon Bintang / Perayaan Ceria -->
+      <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-amber-400 to-emas-500 text-white flex items-center justify-center text-4xl shadow-xl ring-8 ring-amber-100 animate-pulse-subtle">
+        <i class="fa-solid fa-star"></i>
+      </div>
+
+      <div class="space-y-2">
+        <span class="inline-block px-3.5 py-1 bg-emerald-100 text-emerald-900 rounded-full text-xs font-black border border-emerald-300">
+          Alhamdulillah Laporan Tersimpan! 🌟
+        </span>
+        <h3 class="text-xl sm:text-2xl font-black text-emerald-950">
+          Masya Allah, Hebat Sekali!
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-600 font-medium">
+          Terima kasih <strong id="modalStudentName" class="text-emerald-800">Ananda</strong> (SDN 1 Candi) telah istiqomah melaksanakan salat fardu hari ini.
+        </p>
+      </div>
+
+      <!-- Detail Perolehan Poin -->
+      <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 text-left space-y-2.5">
+        <div class="flex items-center justify-between text-xs font-black text-emerald-950">
+          <span>Perolehan Bintang Hari Ini:</span>
+          <span id="modalScoreValue" class="text-emerald-800 text-sm font-extrabold">15 / 15 Poin</span>
+        </div>
+        <div class="w-full bg-emerald-200 h-3 rounded-full overflow-hidden">
+          <div id="modalScoreBar" class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-500" style="width: 100%;"></div>
+        </div>
+        <p id="modalHadisQuote" class="text-[11px] text-emerald-900 font-medium italic pt-1 border-t border-emerald-200 leading-relaxed">
+          "Salat lima waktu menghapuskan dosa-dosa kecil di antara waktu-waktu tersebut selama dosa besar dijauhi." (HR. Muslim)
+        </p>
+      </div>
+
+      <div class="pt-2 flex items-center justify-center gap-3">
+        <button onclick="app.closeAppreciationModal()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-sm shadow-md transition-all">
+          Lanjutkan & Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL 3: PANDUAN GOOGLE APPS SCRIPT        -->
+  <!-- ========================================== -->
+  <div id="modalSheetGuide" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-2xl w-full shadow-2xl border-2 border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto custom-scroll">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-table-list"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Integrasi Google Sheets & Apps Script</h3>
+            <p class="text-xs text-slate-500">Cara menghubungkan laporan salat SDN 1 Candi ke Google Spreadsheet guru.</p>
+          </div>
+        </div>
+        <button onclick="app.closeSheetGuideModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-600 leading-relaxed font-medium">
+        <div class="p-3 bg-teal-50 rounded-2xl border-2 border-teal-200 text-teal-900">
+          <p class="font-extrabold mb-1">Status Integrasi Saat Ini:</p>
+          <p>Variabel <code class="bg-white px-2 py-0.5 rounded-md border border-teal-300 font-mono text-teal-800 font-bold">GOOGLE_SCRIPT_URL</code> berada di baris pertama script. Laporan otomatis tersimpan di memori lokal peramban (localStorage) dan dikirim ke Google Sheets jika URL aktif.</p>
+        </div>
+
+        <h4 class="font-black text-slate-800 text-sm pt-1">Langkah 3 Menit Menghubungkan Google Spreadsheet:</h4>
+        <ol class="list-decimal list-inside space-y-1.5 pl-1">
+          <li>Buka <strong>Google Sheets</strong> baru, beri judul <em>"Rekap DIMAS SDN 1 Candi Ponorogo"</em>.</li>
+          <li>Klik menu <strong>Extensions (Ekstensi)</strong> &rarr; <strong>Apps Script</strong>.</li>
+          <li>Hapus kode bawaan, lalu tempelkan kode berikut:</li>
+        </ol>
+
+        <div class="relative">
+          <pre class="bg-slate-900 text-slate-100 p-3.5 rounded-2xl text-[11px] font-mono overflow-x-auto custom-scroll selection:bg-emerald-600">
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        "Waktu Kirim", "Sekolah", "Tanggal Salat", "Nama Siswa", "Kelas", 
+        "Jenis Kelamin", "Status Haiz", "Subuh", "Zuhur", 
+        "Asar", "Magrib", "Isya", "Total Poin", "Catatan"
+      ]);
+    }
+    var data = JSON.parse(e.postData.contents);
+    sheet.appendRow([
+      new Date(), "SDN 1 Candi", data.tanggal, data.nama, data.kelas,
+      data.gender, data.isHaiz ? "Haiz" : "-",
+      data.subuh, data.zuhur, data.asar, data.magrib, data.isya,
+      data.totalPoin, data.catatan || ""
+    ]);
+    return ContentService.createTextOutput(
+      JSON.stringify({ status: "success" })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ status: "error", message: err.toString() })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}</pre>
+        </div>
+
+        <ol start="4" class="list-decimal list-inside space-y-1.5 pl-1">
+          <li>Klik tombol <strong>Deploy (Terapkan)</strong> &rarr; <strong>New Deployment</strong>.</li>
+          <li>Pilih jenis <strong>Web App</strong>. Set <em>Who has access</em> ke <strong>"Anyone" (Siapa saja)</strong>.</li>
+          <li>Salin Web App URL, lalu tempelkan ke variabel <code class="font-mono bg-slate-100 px-1 py-0.5 rounded text-emerald-800">GOOGLE_SCRIPT_URL</code>.</li>
+        </ol>
+      </div>
+
+      <div class="pt-2 border-t border-slate-100 flex justify-end">
+        <button onclick="app.closeSheetGuideModal()" class="px-5 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs">
+          Mengerti & Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- JAVASCRIPT LOGIC LENGKAP                   -->
+  <!-- ========================================== -->
+  <script>
+    /**
+     * =========================================================================
+     * VARIABEL GLOBAL INTEGRASI GOOGLE APPS SCRIPT / GOOGLE SHEETS
+     * Ganti string di bawah ini dengan URL Web App hasil deploy Google Apps Script Anda.
+     * =========================================================================
+     */
+    const GOOGLE_SCRIPT_URL = "URL_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI";
+
+    /**
+     * Identitas Resmi Lembaga Sekolah
+     */
+    const SCHOOL_INFO = {
+      name: "SD Negeri 1 Candi",
+      district: "Kecamatan Mlarak",
+      city: "Kabupaten Ponorogo",
+      province: "Jawa Timur",
+      subject: "Pendidikan Agama Islam dan Budi Pekerti (PAI-BP)"
+    };
+
+    /**
+     * Konfigurasi Wilayah Kabupaten Ponorogo, Jawa Timur, Indonesia
+     */
+    const PONOROGO_COORDS = {
+      name: "Ponorogo (Kec. Mlarak)",
+      latitude: -7.8680,
+      longitude: 111.4623,
+      timezone: "Asia/Jakarta"
+    };
+
+    /**
+     * Batasan Periode Program Pembiasaan Salat SD
+     * Berlaku khusus: 1 Oktober 2026 s/d 31 Desember 2026
+     */
+    const PROGRAM_DATE_RANGE = {
+      min: "2026-10-01",
+      max: "2026-12-31"
+    };
+
+    /**
+     * Definisi 5 Waktu Salat DIMAS Ramah Anak (Zuhur, Isya, Magrib, Asar, Subuh)
+     */
+    const PRAYER_DEFINITIONS = [
+      { id: "subuh", label: "Subuh", code: "S", emoji: "🌅", icon: "fa-cloud-sun", desc: "2 Rakaat di waktu fajar menyingsing", baseTime: "04:08", themeClass: "border-emerald-200 bg-emerald-50/50" },
+      { id: "zuhur", label: "Zuhur", code: "D", emoji: "☀️", icon: "fa-sun", desc: "4 Rakaat di tengah hari cerah", baseTime: "11:32", themeClass: "border-amber-200 bg-amber-50/50" },
+      { id: "asar", label: "Asar", code: "A", emoji: "🌤️", icon: "fa-sun-plant-wilt", desc: "4 Rakaat di sore hari berkah", baseTime: "14:45", themeClass: "border-orange-200 bg-orange-50/50" },
+      { id: "magrib", label: "Magrib", code: "M", emoji: "🌇", icon: "fa-cloud-moon", desc: "3 Rakaat di senja yang hening", baseTime: "17:39", themeClass: "border-rose-200 bg-rose-50/50" },
+      { id: "isya", label: "Isya", code: "I", emoji: "🌙", icon: "fa-moon", desc: "4 Rakaat di malam yang tenang", baseTime: "18:49", themeClass: "border-indigo-200 bg-indigo-50/50" }
+    ];
+
+    /**
+     * Kumpulan Hadis & Kata Mutiara Pembangun Karakter Siswa SDN 1 Candi
+     */
+    const ISLAMIC_QUOTES = [
+      "Salat adalah tiang agama. Barangsiapa mendirikannya, sungguh ia telah menegakkan agama. (HR. Baihaqi)",
+      "Perkara pertama yang dihisab dari seorang hamba pada hari kiamat adalah salatnya. (HR. Tirmidzi)",
+      "Jadikanlah sabar dan salat sebagai penolongmu. Sesungguhnya Allah bersama orang-orang yang sabar. (QS. Al-Baqarah: 153)",
+      "Salat lima waktu menghapuskan dosa-dosa kecil di antara waktu-waktu tersebut. (HR. Muslim)",
+      "Salat berjamaah lebih utama daripada salat sendirian sebanyak 27 derajat. (HR. Bukhari & Muslim)"
+    ];
+
+    /**
+     * Module Utama Aplikasi DIMAS SDN 1 Candi
+     */
+    const app = {
+      currentView: 'home',
+      currentStudent: null,
+      currentPrayerTimes: {
+        Subuh: '04:08',
+        Zuhur: '11:32',
+        Asar: '14:45',
+        Magrib: '17:39',
+        Isya: '18:49'
+      },
+      reports: [],
+      selectedDate: '',
+      isHaiz: false,
+      dailySelections: {
+        subuh: null,
+        zuhur: null,
+        asar: null,
+        magrib: null,
+        isya: null
+      },
+
+      init() {
+        this.loadStorage();
+        this.initDatePickerBounds();
+        this.renderPrayerCards();
+        this.fetchPonorogoPrayerTimes();
+        this.startLiveClock();
+        this.renderTeacherTable();
+        this.rotateMotivationalQuote();
+
+        if (this.currentStudent && this.currentStudent.name) {
+          this.applyStudentInfoToUI();
+        }
+      },
+
+      loadStorage() {
+        try {
+          const savedStudent = localStorage.getItem('dimas_student_profile');
+          if (savedStudent) {
+            this.currentStudent = JSON.parse(savedStudent);
+          }
+
+          const savedReports = localStorage.getItem('dimas_prayer_reports');
+          if (savedReports) {
+            this.reports = JSON.parse(savedReports);
+          } else {
+            this.reports = this.generateSampleReports();
+            this.saveReportsToStorage();
+          }
+        } catch (e) {
+          console.error("Gagal membaca localStorage:", e);
+        }
+      },
+
+      saveReportsToStorage() {
+        try {
+          localStorage.setItem('dimas_prayer_reports', JSON.stringify(this.reports));
+        } catch (e) {
+          console.error("Gagal menyimpan laporan:", e);
+        }
+      },
+
+      saveStudentToStorage() {
+        try {
+          localStorage.setItem('dimas_student_profile', JSON.stringify(this.currentStudent));
+        } catch (e) {
+          console.error("Gagal menyimpan profil siswa:", e);
+        }
+      },
+
+      initDatePickerBounds() {
+        const dateInput = document.getElementById('prayerDateInput');
+        const filterDateInput = document.getElementById('filterDateInput');
+
+        if (dateInput) {
+          dateInput.min = PROGRAM_DATE_RANGE.min;
+          dateInput.max = PROGRAM_DATE_RANGE.max;
+
+          const now = new Date();
+          const todayISO = now.toISOString().split('T')[0];
+          
+          if (todayISO >= PROGRAM_DATE_RANGE.min && todayISO <= PROGRAM_DATE_RANGE.max) {
+            dateInput.value = todayISO;
+            this.selectedDate = todayISO;
+          } else {
+            dateInput.value = "2026-10-09";
+            this.selectedDate = "2026-10-09";
+          }
+        }
+
+        if (filterDateInput) {
+          filterDateInput.min = PROGRAM_DATE_RANGE.min;
+          filterDateInput.max = PROGRAM_DATE_RANGE.max;
+        }
+      },
+
+      navTo(viewName) {
+        this.currentView = viewName;
+        const views = ['home', 'student-identity', 'student-dashboard', 'teacher-dashboard'];
+        views.forEach(v => {
+          const el = document.getElementById(`view-${v}`);
+          if (el) el.classList.add('hidden');
+        });
+
+        const target = document.getElementById(`view-${viewName}`);
+        if (target) {
+          target.classList.remove('hidden');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        const navBadge = document.getElementById('roleNavBadge');
+        if (navBadge) {
+          if (viewName === 'home') {
+            navBadge.classList.add('hidden');
+            navBadge.classList.remove('flex');
+          } else {
+            navBadge.classList.remove('hidden');
+            navBadge.classList.add('flex');
+          }
+        }
+
+        if (viewName === 'teacher-dashboard') {
+          this.renderTeacherTable();
+        } else if (viewName === 'student-dashboard') {
+          this.loadStudentReportForDate(this.selectedDate);
+          this.renderStudentHistory();
+        }
+      },
+
+      selectRole(role) {
+        if (role === 'student') {
+          if (this.currentStudent && this.currentStudent.name && this.currentStudent.className) {
+            this.navTo('student-dashboard');
+          } else {
+            this.navTo('student-identity');
+          }
+        }
+      },
+
+      confirmSwitchRole() {
+        this.navTo('home');
+      },
+
+      handleStudentIdentitySubmit(e) {
+        e.preventDefault();
+        const nameInput = document.getElementById('studentNameInput').value.trim();
+        const classSelect = document.getElementById('studentClassSelect').value;
+        const genderInput = document.querySelector('input[name="gender"]:checked').value;
+
+        if (!nameInput || !classSelect) {
+          alert("Mohon lengkapi Nama dan Kelas Ananda terlebih dahulu.");
+          return;
+        }
+
+        this.currentStudent = {
+          name: nameInput,
+          className: classSelect,
+          gender: genderInput,
+          school: "SD Negeri 1 Candi"
+        };
+
+        this.saveStudentToStorage();
+        this.applyStudentInfoToUI();
+        this.navTo('student-dashboard');
+      },
+
+      editStudentIdentity() {
+        if (this.currentStudent) {
+          document.getElementById('studentNameInput').value = this.currentStudent.name || '';
+          document.getElementById('studentClassSelect').value = this.currentStudent.className || '';
+          const radios = document.querySelectorAll('input[name="gender"]');
+          radios.forEach(r => {
+            r.checked = (r.value === this.currentStudent.gender);
+          });
+        }
+        this.navTo('student-identity');
+      },
+
+      applyStudentInfoToUI() {
+        if (!this.currentStudent) return;
+        document.getElementById('headerStudentName').textContent = this.currentStudent.name;
+        document.getElementById('headerStudentClass').textContent = this.currentStudent.className;
+        
+        const genderBadge = document.getElementById('headerStudentGenderBadge');
+        const femaleOption = document.getElementById('femaleSpecialOption');
+
+        if (this.currentStudent.gender === 'Perempuan') {
+          genderBadge.innerHTML = '👧 Siswi Muslimah';
+          genderBadge.className = 'text-xs font-bold text-pink-200';
+          femaleOption.classList.remove('hidden');
+        } else {
+          genderBadge.innerHTML = '👦 Siswa Muslim';
+          genderBadge.className = 'text-xs font-bold text-amber-200';
+          femaleOption.classList.add('hidden');
+          this.isHaiz = false;
+          const haizBox = document.getElementById('haizCheckbox');
+          if (haizBox) haizBox.checked = false;
+          document.getElementById('haizNoticeBanner').classList.add('hidden');
+        }
+      },
+
+      rotateMotivationalQuote() {
+        const quoteEl = document.getElementById('studentMotivationalQuote');
+        if (quoteEl) {
+          const randomIndex = Math.floor(Math.random() * ISLAMIC_QUOTES.length);
+          quoteEl.textContent = `"${ISLAMIC_QUOTES[randomIndex]}"`;
+        }
+      },
+
+      startLiveClock() {
+        const update = () => {
+          const now = new Date();
+          const str = now.toLocaleTimeString('id-ID', { hour12: false }) + ' WIB';
+          const homeClock = document.getElementById('homeCurrentClock');
+          const studentClock = document.getElementById('studentDigitalClock');
+          if (homeClock) homeClock.textContent = str;
+          if (studentClock) studentClock.textContent = str;
+
+          this.updatePrayerHighlight(now);
+        };
+        update();
+        setInterval(update, 1000);
+      },
+
+      async fetchPonorogoPrayerTimes() {
+        try {
+          const url = `https://api.aladhan.com/v1/timings?latitude=${PONOROGO_COORDS.latitude}&longitude=${PONOROGO_COORDS.longitude}&method=20`;
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.data && data.data.timings) {
+              const timings = data.data.timings;
+              this.currentPrayerTimes = {
+                Subuh: timings.Fajr || '04:08',
+                Zuhur: timings.Dhuhr || '11:32',
+                Asar: timings.Asr || '14:45',
+                Magrib: timings.Maghrib || '17:39',
+                Isya: timings.Isha || '18:49'
+              };
+            }
+          }
+        } catch (e) {
+          console.log("Menggunakan jadwal salat terkalibrasi Ponorogo:", e);
+        }
+
+        this.renderPrayerTimesToUI();
+      },
+
+      renderPrayerTimesToUI() {
+        const setVal = (id, val) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = val;
+        };
+        setVal('timeSubuh', this.currentPrayerTimes.Subuh);
+        setVal('timeZuhur', this.currentPrayerTimes.Zuhur);
+        setVal('timeAsar', this.currentPrayerTimes.Asar);
+        setVal('timeMagrib', this.currentPrayerTimes.Magrib);
+        setVal('timeIsya', this.currentPrayerTimes.Isya);
+
+        const homeStrip = document.getElementById('homePrayerStrip');
+        if (homeStrip) {
+          homeStrip.innerHTML = `
+            <div class="p-2 sm:p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200">
+              <span class="text-base sm:text-xl">🌅</span>
+              <p class="text-[10px] sm:text-xs font-bold text-emerald-800 uppercase mt-1">Subuh</p>
+              <p class="text-xs sm:text-sm font-black text-slate-900">${this.currentPrayerTimes.Subuh}</p>
+            </div>
+            <div class="p-2 sm:p-3 rounded-2xl bg-amber-50/80 border border-amber-200">
+              <span class="text-base sm:text-xl">☀️</span>
+              <p class="text-[10px] sm:text-xs font-bold text-amber-800 uppercase mt-1">Zuhur</p>
+              <p class="text-xs sm:text-sm font-black text-slate-900">${this.currentPrayerTimes.Zuhur}</p>
+            </div>
+            <div class="p-2 sm:p-3 rounded-2xl bg-orange-50/80 border border-orange-200">
+              <span class="text-base sm:text-xl">🌤️</span>
+              <p class="text-[10px] sm:text-xs font-bold text-orange-800 uppercase mt-1">Asar</p>
+              <p class="text-xs sm:text-sm font-black text-slate-900">${this.currentPrayerTimes.Asar}</p>
+            </div>
+            <div class="p-2 sm:p-3 rounded-2xl bg-rose-50/80 border border-rose-200">
+              <span class="text-base sm:text-xl">🌇</span>
+              <p class="text-[10px] sm:text-xs font-bold text-rose-800 uppercase mt-1">Magrib</p>
+              <p class="text-xs sm:text-sm font-black text-slate-900">${this.currentPrayerTimes.Magrib}</p>
+            </div>
+            <div class="p-2 sm:p-3 rounded-2xl bg-indigo-50/80 border border-indigo-200">
+              <span class="text-base sm:text-xl">🌙</span>
+              <p class="text-[10px] sm:text-xs font-bold text-indigo-800 uppercase mt-1">Isya</p>
+              <p class="text-xs sm:text-sm font-black text-slate-900">${this.currentPrayerTimes.Isya}</p>
+            </div>
+          `;
+        }
+
+        const teacherStrip = document.getElementById('teacherPrayerTimesStrip');
+        if (teacherStrip) {
+          teacherStrip.innerHTML = `
+            <span class="bg-emerald-50 px-2 py-1 rounded-xl border border-emerald-200 font-bold text-emerald-900">Subuh ${this.currentPrayerTimes.Subuh}</span>
+            <span class="bg-amber-50 px-2 py-1 rounded-xl border border-amber-200 font-bold text-amber-900">Zuhur ${this.currentPrayerTimes.Zuhur}</span>
+            <span class="bg-orange-50 px-2 py-1 rounded-xl border border-orange-200 font-bold text-orange-900">Asar ${this.currentPrayerTimes.Asar}</span>
+            <span class="bg-rose-50 px-2 py-1 rounded-xl border border-rose-200 font-bold text-rose-900">Magrib ${this.currentPrayerTimes.Magrib}</span>
+            <span class="bg-indigo-50 px-2 py-1 rounded-xl border border-indigo-200 font-bold text-indigo-900">Isya ${this.currentPrayerTimes.Isya}</span>
+          `;
+        }
+      },
+
+      updatePrayerHighlight(now) {
+        const badge = document.getElementById('prayerActiveStatusBadge');
+        if (!badge) return;
+
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+        const parseMin = (tStr) => {
+          if (!tStr) return 0;
+          const [h, m] = tStr.split(':').map(Number);
+          return h * 60 + m;
+        };
+
+        const subuhMin = parseMin(this.currentPrayerTimes.Subuh);
+        const zuhurMin = parseMin(this.currentPrayerTimes.Zuhur);
+        const asarMin = parseMin(this.currentPrayerTimes.Asar);
+        const magribMin = parseMin(this.currentPrayerTimes.Magrib);
+        const isyaMin = parseMin(this.currentPrayerTimes.Isya);
+
+        let currentPrayer = "Menjelang Subuh";
+        if (currentMinutes >= isyaMin || currentMinutes < subuhMin) {
+          currentPrayer = "Waktu Isya / Istirahat Malam";
+        } else if (currentMinutes >= magribMin) {
+          currentPrayer = "Sedang Masuk Waktu Magrib";
+        } else if (currentMinutes >= asarMin) {
+          currentPrayer = "Sedang Masuk Waktu Asar";
+        } else if (currentMinutes >= zuhurMin) {
+          currentPrayer = "Sedang Masuk Waktu Zuhur";
+        } else if (currentMinutes >= subuhMin) {
+          currentPrayer = "Sedang Masuk Waktu Subuh";
+        }
+
+        badge.innerHTML = `<i class="fa-regular fa-clock mr-1 text-emerald-600"></i> ${currentPrayer}`;
+      },
+
+      renderPrayerCards() {
+        const container = document.getElementById('prayerCardsContainer');
+        if (!container) return;
+
+        container.innerHTML = PRAYER_DEFINITIONS.map((prayer) => {
+          return `
+            <div class="bg-white rounded-3xl p-4 sm:p-5 border-2 ${prayer.themeClass} hover:border-emerald-400 transition-all shadow-sm" id="prayerCard_${prayer.id}">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-2xl bg-white border-2 border-emerald-200 shadow-2xs flex items-center justify-center text-2xl shrink-0">
+                    <span>${prayer.emoji}</span>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h4 class="text-base sm:text-lg font-black text-slate-900">Salat ${prayer.label}</h4>
+                      <span class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">DIMAS: ${prayer.code}</span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-medium">${prayer.desc} (Jadwal: ${prayer.baseTime} WIB)</p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 self-end sm:self-auto">
+                  <span id="badgeScore_${prayer.id}" class="text-xs font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-500 border border-slate-200">
+                    Belum Dipilih
+                  </span>
+                </div>
+              </div>
+
+              <!-- Pilihan 3 Tombol Opsi Ramah Anak -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3">
+                <button type="button" onclick="app.selectPrayerOption('${prayer.id}', 'Berjamaah', 3)" id="btn_${prayer.id}_Berjamaah"
+                  class="prayer-btn py-3 px-3.5 rounded-2xl border-2 border-slate-200 text-xs font-bold text-slate-700 hover:border-emerald-500 hover:bg-emerald-50 transition-all flex items-center justify-between group">
+                  <span class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                      <i class="fa-solid fa-users"></i>
+                    </span>
+                    <span>Salat Berjamaah</span>
+                  </span>
+                  <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300">+3 Poin</span>
+                </button>
+
+                <button type="button" onclick="app.selectPrayerOption('${prayer.id}', 'Munfarid', 2)" id="btn_${prayer.id}_Munfarid"
+                  class="prayer-btn py-3 px-3.5 rounded-2xl border-2 border-slate-200 text-xs font-bold text-slate-700 hover:border-amber-500 hover:bg-amber-50 transition-all flex items-center justify-between group">
+                  <span class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xs group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                      <i class="fa-solid fa-user"></i>
+                    </span>
+                    <span>Salat Sendiri</span>
+                  </span>
+                  <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 border border-amber-300">+2 Poin</span>
+                </button>
+
+                <button type="button" onclick="app.selectPrayerOption('${prayer.id}', 'Tidak Salat', 0)" id="btn_${prayer.id}_Tidak_Salat"
+                  class="prayer-btn py-3 px-3.5 rounded-2xl border-2 border-slate-200 text-xs font-bold text-slate-700 hover:border-rose-400 hover:bg-rose-50 transition-all flex items-center justify-between group">
+                  <span class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-xs group-hover:bg-rose-500 group-hover:text-white transition-colors">
+                      <i class="fa-solid fa-xmark"></i>
+                    </span>
+                    <span>Tidak Salat</span>
+                  </span>
+                  <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-rose-100 text-rose-800 border border-rose-300">0 Poin</span>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      selectPrayerOption(prayerId, statusName, score) {
+        if (this.isHaiz) return;
+
+        this.dailySelections[prayerId] = {
+          status: statusName,
+          score: score
+        };
+
+        this.updatePrayerCardUI(prayerId, statusName, score);
+        this.calculateLiveScore();
+      },
+
+      updatePrayerCardUI(prayerId, statusName, score) {
+        const btnPrefix = `btn_${prayerId}_`;
+        ['Berjamaah', 'Munfarid', 'Tidak_Salat'].forEach(k => {
+          const btn = document.getElementById(btnPrefix + k);
+          if (btn) {
+            btn.className = "prayer-btn py-3 px-3.5 rounded-2xl border-2 border-slate-200 text-xs font-bold text-slate-700 hover:border-slate-400 transition-all flex items-center justify-between group";
+          }
+        });
+
+        const activeKey = statusName.replace(' ', '_');
+        const activeBtn = document.getElementById(btnPrefix + activeKey);
+        const badge = document.getElementById(`badgeScore_${prayerId}`);
+
+        if (statusName === 'Berjamaah') {
+          if (activeBtn) {
+            activeBtn.className = "prayer-btn py-3 px-3.5 rounded-2xl border-2 border-emerald-600 bg-emerald-100/80 text-xs font-black text-emerald-950 shadow-xs flex items-center justify-between";
+          }
+          if (badge) {
+            badge.className = "text-xs font-black px-3 py-1 rounded-xl bg-emerald-100 text-emerald-800 border-2 border-emerald-400 shadow-2xs";
+            badge.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Berjamaah (+3 ⭐)`;
+          }
+        } else if (statusName === 'Munfarid') {
+          if (activeBtn) {
+            activeBtn.className = "prayer-btn py-3 px-3.5 rounded-2xl border-2 border-amber-500 bg-amber-100/80 text-xs font-black text-amber-950 shadow-xs flex items-center justify-between";
+          }
+          if (badge) {
+            badge.className = "text-xs font-black px-3 py-1 rounded-xl bg-amber-100 text-amber-800 border-2 border-amber-400 shadow-2xs";
+            badge.innerHTML = `<i class="fa-solid fa-circle-check text-amber-600 mr-1"></i> Sendiri (+2 ⭐)`;
+          }
+        } else if (statusName === 'Tidak Salat') {
+          if (activeBtn) {
+            activeBtn.className = "prayer-btn py-3 px-3.5 rounded-2xl border-2 border-rose-500 bg-rose-100/80 text-xs font-black text-rose-950 shadow-xs flex items-center justify-between";
+          }
+          if (badge) {
+            badge.className = "text-xs font-black px-3 py-1 rounded-xl bg-rose-100 text-rose-800 border-2 border-rose-400 shadow-2xs";
+            badge.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 mr-1"></i> Tidak Salat (0)`;
+          }
+        } else if (statusName === 'Haiz') {
+          if (badge) {
+            badge.className = "text-xs font-black px-3 py-1 rounded-xl bg-purple-100 text-purple-800 border-2 border-purple-400 shadow-2xs";
+            badge.innerHTML = `🌸 Berhalangan (Haiz)`;
+          }
+        }
+      },
+
+      toggleHaizStatus(checked) {
+        this.isHaiz = checked;
+        const banner = document.getElementById('haizNoticeBanner');
+
+        if (checked) {
+          banner.classList.remove('hidden');
+          PRAYER_DEFINITIONS.forEach(p => {
+            this.dailySelections[p.id] = { status: 'Haiz', score: 3 };
+            this.updatePrayerCardUI(p.id, 'Haiz', 3);
+            ['Berjamaah', 'Munfarid', 'Tidak_Salat'].forEach(k => {
+              const b = document.getElementById(`btn_${p.id}_${k}`);
+              if (b) b.classList.add('opacity-40', 'pointer-events-none');
+            });
+          });
+        } else {
+          banner.classList.add('hidden');
+          PRAYER_DEFINITIONS.forEach(p => {
+            this.dailySelections[p.id] = null;
+            const badge = document.getElementById(`badgeScore_${p.id}`);
+            if (badge) {
+              badge.className = "text-xs font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-500 border border-slate-200";
+              badge.textContent = "Belum Dipilih";
+            }
+            ['Berjamaah', 'Munfarid', 'Tidak_Salat'].forEach(k => {
+              const b = document.getElementById(`btn_${p.id}_${k}`);
+              if (b) {
+                b.classList.remove('opacity-40', 'pointer-events-none');
+                b.className = "prayer-btn py-3 px-3.5 rounded-2xl border-2 border-slate-200 text-xs font-bold text-slate-700 hover:border-slate-400 transition-all flex items-center justify-between group";
+              }
+            });
+          });
+        }
+
+        this.calculateLiveScore();
+      },
+
+      calculateLiveScore() {
+        let total = 0;
+        let filled = 0;
+
+        PRAYER_DEFINITIONS.forEach(p => {
+          const sel = this.dailySelections[p.id];
+          if (sel) {
+            total += sel.score;
+            filled++;
+          }
+        });
+
+        const scoreEl = document.getElementById('liveTotalScore');
+        const countEl = document.getElementById('liveFilledCount');
+        const labelEl = document.getElementById('liveScoreLabel');
+
+        if (scoreEl) scoreEl.textContent = total;
+        if (countEl) countEl.textContent = `${filled} dari 5 Salat Dipilih`;
+
+        if (labelEl) {
+          if (this.isHaiz) {
+            labelEl.textContent = "Dispensasi Syar'i (15 ⭐)";
+            labelEl.className = "text-xs font-black px-3 py-0.5 rounded-full bg-purple-700 text-white";
+          } else if (filled < 5) {
+            labelEl.textContent = "Belum Lengkap";
+            labelEl.className = "text-xs font-black px-3 py-0.5 rounded-full bg-white/25 text-white";
+          } else if (total === 15) {
+            labelEl.textContent = "Sempurna! ⭐⭐⭐⭐⭐";
+            labelEl.className = "text-xs font-black px-3 py-0.5 rounded-full bg-emerald-800 text-white shadow-xs";
+          } else if (total >= 10) {
+            labelEl.textContent = "Sangat Baik! 🌟";
+            labelEl.className = "text-xs font-black px-3 py-0.5 rounded-full bg-teal-800 text-white shadow-xs";
+          } else {
+            labelEl.textContent = "Tingkatkan Lagi Semangatmu!";
+            labelEl.className = "text-xs font-black px-3 py-0.5 rounded-full bg-amber-800 text-white shadow-xs";
+          }
+        }
+      },
+
+      onDateChanged(newDate) {
+        if (!newDate) return;
+        if (newDate < PROGRAM_DATE_RANGE.min || newDate > PROGRAM_DATE_RANGE.max) {
+          alert(`Peringatan: Program pembiasaan DIMAS SDN 1 Candi berlangsung dari ${PROGRAM_DATE_RANGE.min} hingga ${PROGRAM_DATE_RANGE.max}. Silakan pilih tanggal dalam rentang tersebut.`);
+          document.getElementById('prayerDateInput').value = "2026-10-09";
+          this.selectedDate = "2026-10-09";
+          return;
+        }
+
+        this.selectedDate = newDate;
+        this.loadStudentReportForDate(newDate);
+      },
+
+      loadStudentReportForDate(dateStr) {
+        if (!this.currentStudent) return;
+
+        this.isHaiz = false;
+        const haizBox = document.getElementById('haizCheckbox');
+        if (haizBox) haizBox.checked = false;
+        document.getElementById('haizNoticeBanner').classList.add('hidden');
+        document.getElementById('studentNotesInput').value = '';
+
+        PRAYER_DEFINITIONS.forEach(p => {
+          this.dailySelections[p.id] = null;
+          const badge = document.getElementById(`badgeScore_${p.id}`);
+          if (badge) {
+            badge.className = "text-xs font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-500 border border-slate-200";
+            badge.textContent = "Belum Dipilih";
+          }
+          ['Berjamaah', 'Munfarid', 'Tidak_Salat'].forEach(k => {
+            const b = document.getElementById(`btn_${p.id}_${k}`);
+            if (b) {
+              b.classList.remove('opacity-40', 'pointer-events-none');
+              b.className = "prayer-btn py-3 px-3.5 rounded-2xl border-2 border-slate-200 text-xs font-bold text-slate-700 hover:border-slate-400 transition-all flex items-center justify-between group";
+            }
+          });
+        });
+
+        const existing = this.reports.find(r => 
+          r.tanggal === dateStr && 
+          r.nama.toLowerCase() === this.currentStudent.name.toLowerCase() &&
+          r.kelas === this.currentStudent.className
+        );
+
+        if (existing) {
+          if (existing.isHaiz) {
+            if (haizBox) haizBox.checked = true;
+            this.toggleHaizStatus(true);
+          } else {
+            PRAYER_DEFINITIONS.forEach(p => {
+              const status = existing[p.id];
+              const score = existing[`${p.id}Poin`];
+              if (status) {
+                this.dailySelections[p.id] = { status, score };
+                this.updatePrayerCardUI(p.id, status, score);
+              }
+            });
+          }
+          if (existing.catatan) {
+            document.getElementById('studentNotesInput').value = existing.catatan;
+          }
+        }
+
+        this.calculateLiveScore();
+      },
+
+      async handleSavePrayerReport(e) {
+        e.preventDefault();
+
+        if (!this.currentStudent) {
+          alert("Identitas siswa belum diatur!");
+          this.navTo('student-identity');
+          return;
+        }
+
+        const dateVal = document.getElementById('prayerDateInput').value;
+        if (!dateVal || dateVal < PROGRAM_DATE_RANGE.min || dateVal > PROGRAM_DATE_RANGE.max) {
+          alert("Tanggal laporan harus berada dalam rentang 1 Oktober 2026 s/d 31 Desember 2026.");
+          return;
+        }
+
+        if (!this.isHaiz) {
+          const unselected = PRAYER_DEFINITIONS.filter(p => !this.dailySelections[p.id]);
+          if (unselected.length > 0) {
+            const unselectedNames = unselected.map(p => p.label).join(', ');
+            alert(`Mohon lengkapi pilihan untuk salat: ${unselectedNames} terlebih dahulu.`);
+            return;
+          }
+        }
+
+        const notesVal = document.getElementById('studentNotesInput').value.trim();
+
+        let totalPoin = 0;
+        PRAYER_DEFINITIONS.forEach(p => {
+          totalPoin += (this.dailySelections[p.id]?.score || 0);
+        });
+
+        const reportData = {
+          id: 'rep_' + Date.now(),
+          timestamp: new Date().toISOString(),
+          sekolah: "SD Negeri 1 Candi",
+          tanggal: dateVal,
+          nama: this.currentStudent.name,
+          kelas: this.currentStudent.className,
+          gender: this.currentStudent.gender,
+          isHaiz: this.isHaiz,
+          subuh: this.dailySelections.subuh?.status || 'Tidak Salat',
+          subuhPoin: this.dailySelections.subuh?.score || 0,
+          zuhur: this.dailySelections.zuhur?.status || 'Tidak Salat',
+          zuhurPoin: this.dailySelections.zuhur?.score || 0,
+          asar: this.dailySelections.asar?.status || 'Tidak Salat',
+          asarPoin: this.dailySelections.asar?.score || 0,
+          magrib: this.dailySelections.magrib?.status || 'Tidak Salat',
+          magribPoin: this.dailySelections.magrib?.score || 0,
+          isya: this.dailySelections.isya?.status || 'Tidak Salat',
+          isyaPoin: this.dailySelections.isya?.score || 0,
+          totalPoin: totalPoin,
+          catatan: notesVal
+        };
+
+        const existingIdx = this.reports.findIndex(r => 
+          r.tanggal === dateVal && 
+          r.nama.toLowerCase() === this.currentStudent.name.toLowerCase() &&
+          r.kelas === this.currentStudent.className
+        );
+
+        if (existingIdx >= 0) {
+          this.reports[existingIdx] = { ...this.reports[existingIdx], ...reportData };
+        } else {
+          this.reports.unshift(reportData);
+        }
+
+        this.saveReportsToStorage();
+
+        const btnSave = document.getElementById('btnSaveReport');
+        const originalBtnHTML = btnSave.innerHTML;
+        btnSave.disabled = true;
+        btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xl"></i><span>Menyimpan & Menyinkronkan...</span>`;
+
+        this.sendToGoogleSheets(reportData);
+
+        setTimeout(() => {
+          btnSave.disabled = false;
+          btnSave.innerHTML = originalBtnHTML;
+          this.showAppreciationModal(reportData);
+          this.renderStudentHistory();
+        }, 500);
+      },
+
+      async sendToGoogleSheets(payload) {
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("URL_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI")) {
+          console.info("[DIMAS SDN 1 Candi] GOOGLE_SCRIPT_URL belum diisi. Data tersimpan aman di localStorage.");
+          return;
+        }
+
+        try {
+          await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+          });
+          console.log("[DIMAS SDN 1 Candi] Data berhasil dikirim ke Google Sheets.");
+        } catch (error) {
+          console.warn("[DIMAS SDN 1 Candi] Gagal mengirim ke Google Sheets:", error);
+        }
+      },
+
+      showAppreciationModal(data) {
+        document.getElementById('modalStudentName').textContent = data.nama;
+        document.getElementById('modalScoreValue').textContent = `${data.totalPoin} / 15 Poin`;
+
+        const pct = Math.round((data.totalPoin / 15) * 100);
+        document.getElementById('modalScoreBar').style.width = `${pct}%`;
+
+        const modal = document.getElementById('modalAppreciation');
+        modal.classList.remove('hidden');
+
+        this.triggerConfetti();
+      },
+
+      closeAppreciationModal() {
+        document.getElementById('modalAppreciation').classList.add('hidden');
+      },
+
+      triggerConfetti() {
+        const canvas = document.getElementById('confettiCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const colors = ['#10b981', '#059669', '#f59e0b', '#fbbf24', '#38bdf8', '#ec4899', '#6366f1'];
+
+        for (let i = 0; i < 90; i++) {
+          particles.push({
+            x: canvas.width / 2,
+            y: canvas.height / 3,
+            vx: (Math.random() - 0.5) * 12,
+            vy: (Math.random() - 0.7) * 14,
+            size: Math.random() * 8 + 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360,
+            vRot: (Math.random() - 0.5) * 10,
+            alpha: 1
+          });
+        }
+
+        let animationFrame;
+        const animate = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let alive = false;
+
+          particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.35;
+            p.rotation += p.vRot;
+            p.alpha -= 0.012;
+
+            if (p.alpha > 0) {
+              alive = true;
+              ctx.save();
+              ctx.globalAlpha = p.alpha;
+              ctx.translate(p.x, p.y);
+              ctx.rotate((p.rotation * Math.PI) / 180);
+              ctx.fillStyle = p.color;
+              ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+              ctx.restore();
+            }
+          });
+
+          if (alive) {
+            animationFrame = requestAnimationFrame(animate);
+          } else {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            cancelAnimationFrame(animationFrame);
+          }
+        };
+
+        animate();
+      },
+
+      renderStudentHistory() {
+        if (!this.currentStudent) return;
+        const list = document.getElementById('studentHistoryList');
+        const badge = document.getElementById('studentHistoryCountBadge');
+        if (!list) return;
+
+        const studentReps = this.reports.filter(r => 
+          r.nama.toLowerCase() === this.currentStudent.name.toLowerCase() &&
+          r.kelas === this.currentStudent.className
+        );
+
+        if (badge) badge.textContent = `${studentReps.length} Laporan`;
+
+        if (studentReps.length === 0) {
+          list.innerHTML = `<div class="text-center py-4 text-xs text-slate-400">Belum ada riwayat pengisian untuk siswa ini.</div>`;
+          return;
+        }
+
+        list.innerHTML = studentReps.slice(0, 7).map(r => {
+          return `
+            <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50 border border-slate-100 transition-colors text-xs">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl ${r.isHaiz ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-800'} flex items-center justify-center font-black">
+                  ${r.isHaiz ? '🌸' : r.totalPoin}
+                </div>
+                <div>
+                  <p class="font-bold text-slate-800">${this.formatTanggalIndo(r.tanggal)}</p>
+                  <p class="text-[11px] text-slate-500 font-medium">${r.isHaiz ? 'Dispensasi Syar\'i (Haiz)' : `Subuh: ${r.subuh} · Zuhur: ${r.zuhur}`}</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="font-black text-emerald-800">${r.totalPoin} Poin</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      openTeacherLoginModal() {
+        document.getElementById('teacherPinInput').value = '';
+        document.getElementById('loginErrorMsg').classList.add('hidden');
+        document.getElementById('modalTeacherLogin').classList.remove('hidden');
+      },
+
+      closeTeacherLoginModal() {
+        document.getElementById('modalTeacherLogin').classList.add('hidden');
+      },
+
+      togglePinVisibility() {
+        const pinInput = document.getElementById('teacherPinInput');
+        const icon = document.getElementById('pinToggleIcon');
+        if (pinInput.type === 'password') {
+          pinInput.type = 'text';
+          icon.className = 'fa-solid fa-eye-slash text-xs';
+        } else {
+          pinInput.type = 'password';
+          icon.className = 'fa-solid fa-eye text-xs';
+        }
+      },
+
+      handleTeacherLoginSubmit(e) {
+        e.preventDefault();
+        const pin = document.getElementById('teacherPinInput').value.trim();
+        const err = document.getElementById('loginErrorMsg');
+
+        if (pin === '123456') {
+          this.closeTeacherLoginModal();
+          this.navTo('teacher-dashboard');
+        } else {
+          err.textContent = "PIN salah. Gunakan PIN demo: 123456";
+          err.classList.remove('hidden');
+        }
+      },
+
+      renderTeacherTable() {
+        const tbody = document.getElementById('teacherTableBody');
+        const emptyState = document.getElementById('teacherTableEmpty');
+        const filterClass = document.getElementById('filterClassSelect')?.value || 'ALL';
+        const filterDate = document.getElementById('filterDateInput')?.value || '';
+        const filterSearch = (document.getElementById('filterSearchInput')?.value || '').toLowerCase().trim();
+
+        if (!tbody) return;
+
+        let filtered = this.reports.filter(r => {
+          if (filterClass !== 'ALL' && r.kelas !== filterClass) return false;
+          if (filterDate && r.tanggal !== filterDate) return false;
+          if (filterSearch && !r.nama.toLowerCase().includes(filterSearch)) return false;
+          return true;
+        });
+
+        filtered.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+        this.updateTeacherStatistics(filtered);
+
+        const countText = document.getElementById('tableResultCountText');
+        if (countText) countText.textContent = `Menampilkan ${filtered.length} dari ${this.reports.length} data laporan SDN 1 Candi`;
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = '';
+          emptyState?.classList.remove('hidden');
+          return;
+        }
+
+        emptyState?.classList.add('hidden');
+
+        tbody.innerHTML = filtered.map((r, idx) => {
+          return `
+            <tr class="hover:bg-emerald-50/40 transition-colors">
+              <td class="py-3.5 px-4 text-center font-bold text-slate-500">${idx + 1}</td>
+              <td class="py-3.5 px-4 whitespace-nowrap font-bold text-slate-800">${this.formatTanggalIndo(r.tanggal)}</td>
+              <td class="py-3.5 px-4 font-black text-slate-900">${r.nama}</td>
+              <td class="py-3.5 px-3">
+                <span class="px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 font-bold text-[11px] whitespace-nowrap border border-emerald-200">${r.kelas}</span>
+              </td>
+              <td class="py-3.5 px-3 text-slate-500 font-bold">${r.gender === 'Perempuan' ? 'P' : 'L'}</td>
+              <td class="py-3.5 px-3 text-center">${this.renderPrayerBadge(r.subuh, r.isHaiz)}</td>
+              <td class="py-3.5 px-3 text-center">${this.renderPrayerBadge(r.zuhur, r.isHaiz)}</td>
+              <td class="py-3.5 px-3 text-center">${this.renderPrayerBadge(r.asar, r.isHaiz)}</td>
+              <td class="py-3.5 px-3 text-center">${this.renderPrayerBadge(r.magrib, r.isHaiz)}</td>
+              <td class="py-3.5 px-3 text-center">${this.renderPrayerBadge(r.isya, r.isHaiz)}</td>
+              <td class="py-3.5 px-4 text-center">
+                <span class="px-3 py-1 rounded-xl font-black text-xs ${r.totalPoin >= 12 ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : r.totalPoin >= 8 ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
+                  ${r.totalPoin} Poin
+                </span>
+              </td>
+              <td class="py-3.5 px-4 text-slate-600 max-w-xs truncate" title="${r.catatan || '-'}">
+                ${r.catatan || '-'}
+              </td>
+              <td class="py-3.5 px-3 text-center">
+                <button onclick="app.deleteReport('${r.id}')" class="text-slate-400 hover:text-rose-600 p-1.5 transition-colors" title="Hapus Laporan">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      },
+
+      renderPrayerBadge(status, isHaiz) {
+        if (isHaiz) {
+          return `<span class="px-2 py-0.5 rounded-lg bg-purple-100 text-purple-800 font-bold text-[10px]">Haiz</span>`;
+        }
+        if (status === 'Berjamaah') {
+          return `<span class="px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-900 font-bold text-[10px]">Jamaah</span>`;
+        }
+        if (status === 'Munfarid') {
+          return `<span class="px-2 py-0.5 rounded-lg bg-amber-100 text-amber-900 font-bold text-[10px]">Sendiri</span>`;
+        }
+        return `<span class="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-800 font-bold text-[10px]">Tidak</span>`;
+      },
+
+      updateTeacherStatistics(filteredData) {
+        const total = filteredData.length;
+        document.getElementById('statTotalReports').textContent = total;
+
+        if (total === 0) {
+          document.getElementById('statAverageScore').textContent = '0.0';
+          document.getElementById('statCongregationRate').textContent = '0%';
+          document.getElementById('statUniqueStudents').textContent = '0';
+          return;
+        }
+
+        const sumPoints = filteredData.reduce((acc, r) => acc + (r.totalPoin || 0), 0);
+        const avg = (sumPoints / total).toFixed(1);
+        document.getElementById('statAverageScore').textContent = avg;
+
+        let totalSlots = 0;
+        let congregationSlots = 0;
+        filteredData.forEach(r => {
+          if (!r.isHaiz) {
+            ['subuh', 'zuhur', 'asar', 'magrib', 'isya'].forEach(slot => {
+              totalSlots++;
+              if (r[slot] === 'Berjamaah') congregationSlots++;
+            });
+          }
+        });
+
+        const rate = totalSlots > 0 ? Math.round((congregationSlots / totalSlots) * 100) : 0;
+        document.getElementById('statCongregationRate').textContent = `${rate}%`;
+
+        const uniqueNames = new Set(filteredData.map(r => r.nama.toLowerCase()));
+        document.getElementById('statUniqueStudents').textContent = uniqueNames.size;
+      },
+
+      resetFilters() {
+        document.getElementById('filterClassSelect').value = 'ALL';
+        document.getElementById('filterDateInput').value = '';
+        document.getElementById('filterSearchInput').value = '';
+        this.renderTeacherTable();
+      },
+
+      deleteReport(id) {
+        if (confirm("Apakah Bapak Guru yakin ingin menghapus data laporan ini?")) {
+          this.reports = this.reports.filter(r => r.id !== id);
+          this.saveReportsToStorage();
+          this.renderTeacherTable();
+        }
+      },
+
+      confirmClearAllData() {
+        if (confirm("Peringatan: Seluruh data laporan pembiasaan salat SDN 1 Candi akan dihapus. Lanjutkan?")) {
+          this.reports = [];
+          this.saveReportsToStorage();
+          this.renderTeacherTable();
+        }
+      },
+
+      exportToCSV() {
+        if (this.reports.length === 0) {
+          alert("Belum ada data laporan untuk diekspor.");
+          return;
+        }
+
+        const headers = [
+          "No", "Sekolah", "Kecamatan", "Tanggal", "Nama Siswa", "Kelas", "Jenis Kelamin", 
+          "Status Haiz", "Subuh", "Zuhur", "Asar", "Magrib", "Isya", 
+          "Total Poin", "Catatan"
+        ];
+
+        const rows = this.reports.map((r, i) => [
+          i + 1,
+          `"SD Negeri 1 Candi"`,
+          `"Mlarak Ponorogo"`,
+          `"${r.tanggal}"`,
+          `"${r.nama.replace(/"/g, '""')}"`,
+          `"${r.kelas}"`,
+          `"${r.gender}"`,
+          `"${r.isHaiz ? 'Ya (Haiz)' : 'Tidak'}"`,
+          `"${r.subuh}"`,
+          `"${r.zuhur}"`,
+          `"${r.asar}"`,
+          `"${r.magrib}"`,
+          `"${r.isya}"`,
+          r.totalPoin,
+          `"${(r.catatan || '').replace(/"/g, '""')}"`
+        ]);
+
+        const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\r\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `DIMAS_Rekap_Salat_SDN1Candi_Ponorogo_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      },
+
+      generateSampleReports() {
+        return [
+          {
+            id: 'rep_demo_1',
+            timestamp: '2026-10-09T05:30:00.000Z',
+            sekolah: 'SD Negeri 1 Candi',
+            tanggal: '2026-10-09',
+            nama: 'Muhammad Rayhan Al-Ghifari',
+            kelas: 'Kelas 4',
+            gender: 'Laki-laki',
+            isHaiz: false,
+            subuh: 'Berjamaah', subuhPoin: 3,
+            zuhur: 'Berjamaah', zuhurPoin: 3,
+            asar: 'Berjamaah', asarPoin: 3,
+            magrib: 'Berjamaah', magribPoin: 3,
+            isya: 'Munfarid', isyaPoin: 2,
+            totalPoin: 14,
+            catatan: 'Salat Subuh di Masjid Baitul Muttaqin Desa Candi bersama Ayah'
+          },
+          {
+            id: 'rep_demo_2',
+            timestamp: '2026-10-09T06:00:00.000Z',
+            sekolah: 'SD Negeri 1 Candi',
+            tanggal: '2026-10-09',
+            nama: 'Aisyah Nur Salsabila',
+            kelas: 'Kelas 5',
+            gender: 'Perempuan',
+            isHaiz: false,
+            subuh: 'Berjamaah', subuhPoin: 3,
+            zuhur: 'Munfarid', zuhurPoin: 2,
+            asar: 'Berjamaah', asarPoin: 3,
+            magrib: 'Berjamaah', magribPoin: 3,
+            isya: 'Berjamaah', isyaPoin: 3,
+            totalPoin: 14,
+            catatan: 'Alhamdulillah khusyuk berjamaah bersama Ibu di rumah'
+          },
+          {
+            id: 'rep_demo_3',
+            timestamp: '2026-10-08T19:00:00.000Z',
+            sekolah: 'SD Negeri 1 Candi',
+            tanggal: '2026-10-08',
+            nama: 'Ahmad Faiz Mubarok',
+            kelas: 'Kelas 3',
+            gender: 'Laki-laki',
+            isHaiz: false,
+            subuh: 'Munfarid', subuhPoin: 2,
+            zuhur: 'Berjamaah', zuhurPoin: 3,
+            asar: 'Munfarid', asarPoin: 2,
+            magrib: 'Berjamaah', magribPoin: 3,
+            isya: 'Berjamaah', isyaPoin: 3,
+            totalPoin: 13,
+            catatan: 'Zuhur berjamaah di musala SDN 1 Candi'
+          },
+          {
+            id: 'rep_demo_4',
+            timestamp: '2026-10-08T20:00:00.000Z',
+            sekolah: 'SD Negeri 1 Candi',
+            tanggal: '2026-10-08',
+            nama: 'Fatimah Az-Zahra',
+            kelas: 'Kelas 6',
+            gender: 'Perempuan',
+            isHaiz: true,
+            subuh: 'Haiz', subuhPoin: 3,
+            zuhur: 'Haiz', zuhurPoin: 3,
+            asar: 'Haiz', asarPoin: 3,
+            magrib: 'Haiz', magribPoin: 3,
+            isya: 'Haiz', isyaPoin: 3,
+            totalPoin: 15,
+            catatan: 'Sedang berhalangan (haiz). Membaca buku kisah 25 nabi & berzikir.'
+          },
+          {
+            id: 'rep_demo_5',
+            timestamp: '2026-10-07T18:00:00.000Z',
+            sekolah: 'SD Negeri 1 Candi',
+            tanggal: '2026-10-07',
+            nama: 'Bilal Habibi Ramadhan',
+            kelas: 'Kelas 2',
+            gender: 'Laki-laki',
+            isHaiz: false,
+            subuh: 'Berjamaah', subuhPoin: 3,
+            zuhur: 'Berjamaah', zuhurPoin: 3,
+            asar: 'Berjamaah', asarPoin: 3,
+            magrib: 'Berjamaah', magribPoin: 3,
+            isya: 'Berjamaah', isyaPoin: 3,
+            totalPoin: 15,
+            catatan: 'Salat berjamaah di Musala Candi Kidul Mlarak'
+          },
+          {
+            id: 'rep_demo_6',
+            timestamp: '2026-10-06T19:30:00.000Z',
+            sekolah: 'SD Negeri 1 Candi',
+            tanggal: '2026-10-06',
+            nama: 'Zahra Amelia Putri',
+            kelas: 'Kelas 1',
+            gender: 'Perempuan',
+            isHaiz: false,
+            subuh: 'Munfarid', subuhPoin: 2,
+            zuhur: 'Munfarid', zuhurPoin: 2,
+            asar: 'Munfarid', asarPoin: 2,
+            magrib: 'Berjamaah', magribPoin: 3,
+            isya: 'Munfarid', isyaPoin: 2,
+            totalPoin: 11,
+            catatan: 'Belajar salat bersama orang tua di rumah'
+          }
+        ];
+      },
+
+      populateDemoData() {
+        this.reports = this.generateSampleReports();
+        this.saveReportsToStorage();
+        this.renderTeacherTable();
+        alert("Data demo realistis siswa SDN 1 Candi Mlarak Ponorogo berhasil dimuat ulang!");
+      },
+
+      openSheetGuideModal() {
+        document.getElementById('modalSheetGuide').classList.remove('hidden');
+      },
+
+      closeSheetGuideModal() {
+        document.getElementById('modalSheetGuide').classList.add('hidden');
+      },
+
+      formatTanggalIndo(dateStr) {
+        if (!dateStr) return '-';
+        try {
+          const [y, m, d] = dateStr.split('-');
+          const months = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+          ];
+          return `${parseInt(d)} ${months[parseInt(m) - 1]} ${y}`;
+        } catch (e) {
+          return dateStr;
+        }
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      app.init();
+    });
+  </script>
+</body>
+</html>

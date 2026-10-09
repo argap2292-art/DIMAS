@@ -1,0 +1,6 @@
+{
+  "name": "DIMAS - Pembiasaan Salat Fardu Siswa SD",
+  "description": "Aplikasi Web edukatif dan interaktif untuk pemantauan dan pembiasaan salat fardu (DIMAS: Zuhur, Isya, Magrib, Asar, Subuh) peserta didik SD Negeri 1 Candi, Kecamatan Mlarak, Kabupaten Ponorogo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
