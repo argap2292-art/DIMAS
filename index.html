@@ -355,7 +355,7 @@
           <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-teal-800">
             <span class="flex items-center gap-1.5">
               <i class="fa-solid fa-shield-halved text-teal-600"></i>
-              <span>Guru PAI & Budi Pekerti (PIN: 123456)</span>
+              <span>Guru PAI & Budi Pekerti (PIN: ******)</span>
             </span>
             <span class="text-teal-700 font-extrabold group-hover:underline">Buka Portal &rarr;</span>
           </div>
@@ -911,7 +911,7 @@
   </footer>
 
   <!-- ========================================== -->
-  <!-- MODAL 1: LOGIN GURU (PIN: 123456)          -->
+  <!-- MODAL 1: LOGIN GURU (TERPROTEKSI PIN)      -->
   <!-- ========================================== -->
   <div id="modalTeacherLogin" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border-2 border-emerald-100 space-y-5 animate-in fade-in zoom-in-95 duration-150">
@@ -941,9 +941,9 @@
           <p id="loginErrorMsg" class="text-[11px] text-rose-600 font-bold mt-1 hidden"></p>
         </div>
 
-        <div class="p-3 rounded-2xl bg-amber-50 border-2 border-amber-200 text-[11px] text-amber-950 flex items-center gap-2">
-          <i class="fa-solid fa-key text-amber-600 text-sm"></i>
-          <span>PIN Demo Pengujian: <strong class="font-mono font-extrabold text-xs">123456</strong></span>
+        <div class="p-3 rounded-2xl bg-teal-50 border-2 border-teal-200 text-[11px] text-teal-950 flex items-center gap-2">
+          <i class="fa-solid fa-user-shield text-teal-700 text-sm"></i>
+          <span>Akses Terproteksi Khusus Guru PAI (PIN: <strong class="font-mono tracking-widest text-xs">******</strong>)</span>
         </div>
 
         <div class="flex items-center gap-2.5 pt-1">
@@ -1994,11 +1994,12 @@ function doPost(e) {
         const pin = document.getElementById('teacherPinInput').value.trim();
         const err = document.getElementById('loginErrorMsg');
 
+        // Verifikasi PIN Keamanan Guru
         if (pin === '123456') {
           this.closeTeacherLoginModal();
           this.navTo('teacher-dashboard');
         } else {
-          err.textContent = "PIN salah. Gunakan PIN demo: 123456";
+          err.textContent = "PIN salah. Silakan masukkan PIN keamanan Guru yang benar.";
           err.classList.remove('hidden');
         }
       },
