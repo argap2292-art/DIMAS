@@ -142,17 +142,91 @@ function doPost(e) {
 }
 
 /**
- * 3. FUNGSI PENGUJIAN KONEKSI (doGet)
- * Untuk mengecek apakah Web App sudah aktif saat dibuka di browser.
+ * 3. FUNGSI PENGAMBILAN & PENGUJIAN DATA (doGet)
+ * Mengembalikan data rekapitulasi salat siswa ke Dashboard Guru DIMAS secara otomatis (JSON),
+ * atau status aktif saat script diakses via peramban.
  */
 function doGet(e) {
-  return ContentService
-    .createTextOutput(JSON.stringify({
-      status: "active",
-      app: "DIMAS - Pembiasaan Salat Fardu SDN 1 Candi",
-      message: "Web App Google Apps Script aktif dan siap menerima data POST."
-    }))
-    .setMimeType(ContentService.MimeType.JSON);
+  try {
+    var ss = (SPREADSHEET_ID && SPREADSHEET_ID.trim() !== "") 
+      ? SpreadsheetApp.openById(SPREADSHEET_ID) 
+      : SpreadsheetApp.getActiveSpreadsheet();
+
+    var sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) {
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          status: "active",
+          app: "DIMAS - Pembiasaan Salat Fardu SDN 1 Candi",
+          message: "Web App aktif. Sheet belum dibuat, silakan jalankan initialSetup().",
+          count: 0,
+          reports: []
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var values = sheet.getDataRange().getValues();
+    if (values.length <= 1) {
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          status: "active",
+          app: "DIMAS - Pembiasaan Salat Fardu SDN 1 Candi",
+          message: "Web App aktif dan siap menerima data. Belum ada entri siswa.",
+          count: 0,
+          reports: []
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var reports = [];
+    for (var i = 1; i < values.length; i++) {
+      var row = values[i];
+      if (!row[1] && !row[4]) continue; // Lewati jika baris kosong
+      
+      var tglStr = "";
+      if (row[4] instanceof Date) {
+        tglStr = Utilities.formatDate(row[4], "Asia/Jakarta", "yyyy-MM-dd");
+      } else {
+        tglStr = String(row[4] || "").trim();
+      }
+
+      reports.push({
+        timestamp: row[0],
+        namaSiswa: String(row[1] || "").trim(),
+        nama: String(row[1] || "").trim(),
+        kelas: String(row[2] || "").trim(),
+        gender: String(row[3] || "").trim(),
+        tanggal: tglStr,
+        subuh: String(row[5] || "Tidak Salat").trim(),
+        zuhur: String(row[6] || "Tidak Salat").trim(),
+        asar: String(row[7] || "Tidak Salat").trim(),
+        magrib: String(row[8] || "Tidak Salat").trim(),
+        isya: String(row[9] || "Tidak Salat").trim(),
+        totalPoin: Number(row[10]) || 0,
+        keterangan: String(row[11] || "-").trim(),
+        catatan: String(row[11] || "-").trim()
+      });
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        status: "success",
+        app: "DIMAS - Pembiasaan Salat Fardu SDN 1 Candi",
+        message: "Berhasil mengambil data laporan salat peserta didik.",
+        count: reports.length,
+        reports: reports
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        status: "error",
+        app: "DIMAS - Pembiasaan Salat Fardu SDN 1 Candi",
+        message: error.toString()
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 ```
 
@@ -164,4 +238,6 @@ URL Web App resmi Bapak Guru telah terintegrasi di berkas `index.html`:
 ```javascript
 const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbww4JvG5r72yjRqmKiPei_H8oB5DibI_UKKPvThdC9VVSM0CtLYJ43Gg5KkayytmpEfjA/exec";
 ```
-Setiap kali siswa mengisi laporan salat, data akan langsung dikirim secara *real-time* ke URL ini dan otomatis masuk ke baris baru Google Spreadsheet Bapak Guru.
+- **Pengiriman Siswa (POST)**: Setiap kali siswa mengisi laporan salat di form DIMAS, data dikirim secara *real-time* ke URL ini (`mode: 'no-cors'`) dan otomatis masuk ke Google Spreadsheet Bapak Guru.
+- **Pengambilan Guru (GET)**: Dashboard Guru secara otomatis mengambil data rekapitulasi dari Google Sheets via `fetch(GOOGLE_APPS_SCRIPT_URL)` sehingga Bapak Guru selalu melihat data teranyar.
+

@@ -708,18 +708,46 @@
         </div>
       </div>
 
-      <!-- Jadwal Salat Ponorogo Strip di Dashboard Guru -->
-      <div class="bg-white rounded-2xl p-4 border-2 border-emerald-100 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center gap-2 text-xs font-bold text-slate-700">
-          <i class="fa-solid fa-kaaba text-emerald-600"></i>
-          <span>Waktu Salat Ponorogo Hari Ini:</span>
+      <!-- Jadwal Salat Ponorogo & Live Sync Google Sheets Widget di Dashboard Guru -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+        <!-- Jadwal Salat Ponorogo Strip (7 Kolom) -->
+        <div class="lg:col-span-7 bg-white rounded-2xl p-4 border-2 border-emerald-100 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2 text-xs font-bold text-slate-700">
+            <i class="fa-solid fa-kaaba text-emerald-600"></i>
+            <span>Waktu Salat Ponorogo:</span>
+          </div>
+          <div class="grid grid-cols-5 gap-2 text-center text-xs" id="teacherPrayerTimesStrip">
+            <span class="bg-emerald-50 px-2 py-1 rounded-xl border border-emerald-200 font-bold text-emerald-900">Subuh 04:08</span>
+            <span class="bg-amber-50 px-2 py-1 rounded-xl border border-amber-200 font-bold text-amber-900">Zuhur 11:32</span>
+            <span class="bg-orange-50 px-2 py-1 rounded-xl border border-orange-200 font-bold text-orange-900">Asar 14:45</span>
+            <span class="bg-rose-50 px-2 py-1 rounded-xl border border-rose-200 font-bold text-rose-900">Magrib 17:39</span>
+            <span class="bg-indigo-50 px-2 py-1 rounded-xl border border-indigo-200 font-bold text-indigo-900">Isya 18:49</span>
+          </div>
         </div>
-        <div class="grid grid-cols-5 gap-2 text-center text-xs" id="teacherPrayerTimesStrip">
-          <span class="bg-emerald-50 px-2 py-1 rounded-xl border border-emerald-200 font-bold text-emerald-900">Subuh 04:08</span>
-          <span class="bg-amber-50 px-2 py-1 rounded-xl border border-amber-200 font-bold text-amber-900">Zuhur 11:32</span>
-          <span class="bg-orange-50 px-2 py-1 rounded-xl border border-orange-200 font-bold text-orange-900">Asar 14:45</span>
-          <span class="bg-rose-50 px-2 py-1 rounded-xl border border-rose-200 font-bold text-rose-900">Magrib 17:39</span>
-          <span class="bg-indigo-50 px-2 py-1 rounded-xl border border-indigo-200 font-bold text-indigo-900">Isya 18:49</span>
+
+        <!-- Status Sinkronisasi Google Sheets Live (5 Kolom) -->
+        <div class="lg:col-span-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-3.5 px-4 border-2 border-emerald-200/90 shadow-2xs flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div id="gasSyncIconBox" class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm shrink-0 shadow-xs">
+              <i class="fa-solid fa-cloud-arrow-down"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-xs font-black text-slate-900">Google Sheets</span>
+                <span id="gasSyncStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  <i class="fa-solid fa-circle text-[8px] text-emerald-600 mr-1 animate-pulse"></i>Sinkron Otomatis (doGet)
+                </span>
+              </div>
+              <p id="gasSyncLastTime" class="text-[11px] text-slate-500 font-medium truncate">
+                Memuat data otomatis via doGet...
+              </p>
+            </div>
+          </div>
+          <button id="btnManualSyncGas" onclick="app.fetchReportsFromGoogleSheets(true)" title="Sinkronkan data dari Google Sheets sekarang"
+            class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs transition-all shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer">
+            <i id="btnManualSyncIcon" class="fa-solid fa-arrows-rotate text-xs"></i>
+            <span class="hidden sm:inline">Sinkronkan</span>
+          </button>
         </div>
       </div>
 
@@ -796,6 +824,10 @@
           </h3>
 
           <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="app.fetchReportsFromGoogleSheets(true)" class="px-3 py-1.5 text-xs font-bold text-teal-900 bg-teal-100 hover:bg-teal-200 border border-teal-300 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-cloud-arrow-down"></i>
+              <span>Sinkronkan Sheets</span>
+            </button>
             <button onclick="app.populateDemoData()" class="px-3 py-1.5 text-xs font-bold text-emerald-900 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 rounded-xl transition-colors flex items-center gap-1.5">
               <i class="fa-solid fa-wand-magic-sparkles"></i>
               <span>Isi Data Demo</span>
@@ -1068,10 +1100,10 @@ function doPost(e) {
     var data = JSON.parse(e.postData.contents);
     var timestamp = Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyy-MM-dd HH:mm:ss");
     sheet.appendRow([
-      timestamp, data.nama || "", data.kelas || "", data.gender || "", data.tanggal || "",
+      timestamp, data.namaSiswa || data.nama || "", data.kelas || "", data.gender || "", data.tanggal || "",
       data.subuh || "Tidak Salat", data.zuhur || "Tidak Salat", data.asar || "Tidak Salat",
       data.magrib || "Tidak Salat", data.isya || "Tidak Salat",
-      Number(data.totalPoin || 0), data.catatan || ""
+      Number(data.totalPoin || 0), data.keterangan || data.catatan || ""
     ]);
     return ContentService.createTextOutput(JSON.stringify({ status: "success", message: "Data tersimpan" }))
       .setMimeType(ContentService.MimeType.JSON);
@@ -1080,6 +1112,31 @@ function doPost(e) {
       .setMimeType(ContentService.MimeType.JSON);
   } finally {
     lock.releaseLock();
+  }
+}
+
+function doGet(e) {
+  try {
+    var ss = SPREADSHEET_ID ? SpreadsheetApp.openById(SPREADSHEET_ID) : SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(SHEET_NAME) || (initialSetup(), ss.getSheetByName(SHEET_NAME));
+    var values = sheet.getDataRange().getValues();
+    if (values.length <= 1) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "active", count: 0, reports: [] })).setMimeType(ContentService.MimeType.JSON);
+    }
+    var reports = [];
+    for (var i = 1; i < values.length; i++) {
+      var row = values[i];
+      if (!row[1] && !row[4]) continue;
+      reports.push({
+        timestamp: row[0], namaSiswa: row[1], nama: row[1], kelas: row[2], gender: row[3],
+        tanggal: row[4] instanceof Date ? Utilities.formatDate(row[4], "Asia/Jakarta", "yyyy-MM-dd") : String(row[4]),
+        subuh: row[5], zuhur: row[6], asar: row[7], magrib: row[8], isya: row[9],
+        totalPoin: Number(row[10] || 0), keterangan: row[11] || "-", catatan: row[11] || "-"
+      });
+    }
+    return ContentService.createTextOutput(JSON.stringify({ status: "success", count: reports.length, reports: reports })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() })).setMimeType(ContentService.MimeType.JSON);
   }
 }</pre>
         </div>
@@ -1198,6 +1255,9 @@ function doPost(e) {
         this.renderTeacherTable();
         this.rotateMotivationalQuote();
 
+        // Otomatis sinkronkan data laporan dari Google Apps Script Web App (doGet)
+        this.fetchReportsFromGoogleSheets(false);
+
         if (this.currentStudent && this.currentStudent.name) {
           this.applyStudentInfoToUI();
         }
@@ -1291,6 +1351,8 @@ function doPost(e) {
 
         if (viewName === 'teacher-dashboard') {
           this.renderTeacherTable();
+          // Otomatis sinkronkan data terbaru setiap kali guru membuka dashboard
+          this.fetchReportsFromGoogleSheets(false);
         } else if (viewName === 'student-dashboard') {
           this.loadStudentReportForDate(this.selectedDate);
           this.renderStudentHistory();
@@ -2222,6 +2284,206 @@ function doPost(e) {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+      },
+
+      /**
+       * Mengambil data rekapitulasi salat siswa secara otomatis dari Google Apps Script Web App (doGet)
+       */
+      async fetchReportsFromGoogleSheets(isManual = false) {
+        const btnManual = document.getElementById('btnManualSyncGas');
+        const icon = document.getElementById('btnManualSyncIcon');
+        const badge = document.getElementById('gasSyncStatusBadge');
+        const timeText = document.getElementById('gasSyncLastTime');
+
+        if (btnManual && isManual) {
+          btnManual.disabled = true;
+          if (icon) icon.className = "fa-solid fa-spinner fa-spin text-xs";
+        }
+
+        if (badge) {
+          badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
+          badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[8px] mr-1"></i>Menghubungkan...`;
+        }
+
+        try {
+          // Buat URL dengan parameter anti-cache dan action query
+          const targetUrl = GOOGLE_APPS_SCRIPT_URL + (GOOGLE_APPS_SCRIPT_URL.includes('?') ? '&' : '?') + 'action=getReports&_t=' + Date.now();
+          
+          const response = await fetch(targetUrl, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const resData = await response.json();
+          console.log("[DIMAS] Respon dari Google Apps Script (doGet):", resData);
+
+          let incomingReports = null;
+          if (Array.isArray(resData)) {
+            incomingReports = resData;
+          } else if (resData && Array.isArray(resData.reports)) {
+            incomingReports = resData.reports;
+          } else if (resData && Array.isArray(resData.data)) {
+            incomingReports = resData.data;
+          }
+
+          const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+          if (incomingReports && incomingReports.length > 0) {
+            // Normalisasi dan masukkan data ke this.reports
+            const parseScore = (status) => {
+              if (!status) return 0;
+              const s = String(status).toLowerCase();
+              if (s.includes('jamaah') || s.includes('berjamaah')) return 3;
+              if (s.includes('munfarid') || s.includes('sendiri')) return 2;
+              if (s.includes('haiz')) return 3;
+              return 0;
+            };
+
+            const formatted = incomingReports.map((item, idx) => {
+              const nama = item.namaSiswa || item.nama || `Siswa ${idx + 1}`;
+              const tgl = item.tanggal || PROGRAM_DATE_RANGE.min;
+              const kls = item.kelas || 'Kelas 1';
+              const gnd = item.gender || 'Laki-laki';
+              const sbh = item.subuh || 'Tidak Salat';
+              const zhr = item.zuhur || 'Tidak Salat';
+              const asr = item.asar || 'Tidak Salat';
+              const mgb = item.magrib || 'Tidak Salat';
+              const isy = item.isya || 'Tidak Salat';
+              const ket = item.keterangan || item.catatan || '-';
+              const poin = item.totalPoin !== undefined ? Number(item.totalPoin) : this.computeTotalScore(sbh, zhr, asr, mgb, isy);
+              const haiz = (sbh && String(sbh).includes('Haiz')) || (item.isHaiz === true);
+
+              return {
+                id: item.id || `gas_${tgl}_${nama}_${kls}`.replace(/[^a-zA-Z0-9_]/g, '_'),
+                timestamp: item.timestamp || new Date().toISOString(),
+                namaSiswa: nama,
+                nama: nama,
+                kelas: kls,
+                gender: gnd,
+                tanggal: tgl,
+                subuh: sbh,
+                subuhPoin: parseScore(sbh),
+                zuhur: zhr,
+                zuhurPoin: parseScore(zhr),
+                asar: asr,
+                asarPoin: parseScore(asr),
+                magrib: mgb,
+                magribPoin: parseScore(mgb),
+                isya: isy,
+                isyaPoin: parseScore(isy),
+                keterangan: ket,
+                catatan: ket,
+                totalPoin: poin,
+                isHaiz: haiz,
+                sekolah: SCHOOL_INFO.name,
+                source: 'google-sheets'
+              };
+            });
+
+            // Sinkronkan ke daftar lokal: gabungkan baris dari Google Sheets
+            formatted.forEach(f => {
+              const existingIdx = this.reports.findIndex(r => 
+                r.tanggal === f.tanggal && 
+                r.nama.toLowerCase() === f.nama.toLowerCase() && 
+                r.kelas === f.kelas
+              );
+              if (existingIdx >= 0) {
+                this.reports[existingIdx] = { ...this.reports[existingIdx], ...f };
+              } else {
+                this.reports.unshift(f);
+              }
+            });
+
+            this.saveReportsToStorage();
+            this.renderTeacherTable();
+
+            if (badge) {
+              badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+              badge.innerHTML = `<i class="fa-solid fa-check text-[8px] text-emerald-600 mr-1"></i>Tersinkron (${incomingReports.length} Data)`;
+            }
+            if (timeText) {
+              timeText.textContent = `Tersinkron pukul ${nowTime} WIB (${incomingReports.length} laporan)`;
+            }
+
+            if (isManual) {
+              this.showSyncNotification(`Alhamdulillah! Berhasil menyinkronkan ${incomingReports.length} data salat dari Google Sheets.`);
+            }
+          } else if (resData && (resData.status === 'active' || resData.status === 'success')) {
+            // Endpoint aktif dan terhubung
+            if (badge) {
+              badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+              badge.innerHTML = `<i class="fa-solid fa-circle text-[8px] text-emerald-600 mr-1 animate-pulse"></i>Web App Aktif & Terhubung`;
+            }
+            if (timeText) {
+              timeText.textContent = `Terhubung ke Google Sheets (${nowTime} WIB)`;
+            }
+            if (isManual) {
+              this.showSyncNotification("Web App Google Apps Script aktif dan terhubung ke Spreadsheet.");
+            }
+            this.renderTeacherTable();
+          } else {
+            if (badge) {
+              badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-300";
+              badge.innerHTML = `Mode Offline/Lokal`;
+            }
+            if (timeText) {
+              timeText.textContent = `Menggunakan data tersimpan di perangkat`;
+            }
+            this.renderTeacherTable();
+          }
+        } catch (error) {
+          console.warn("[DIMAS] Pengambilan data dari Google Apps Script (doGet):", error);
+          if (badge) {
+            badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 border border-teal-300";
+            badge.innerHTML = `<i class="fa-solid fa-database text-[8px] mr-1"></i>Penyimpanan Lokal Aktif`;
+          }
+          if (timeText) {
+            timeText.textContent = `Data lokal aman & siap dikirim via form`;
+          }
+          if (isManual) {
+            this.showSyncNotification("Data laporan tersimpan aman di peramban. Pengiriman form salat siswa tetap berjalan secara langsung ke Google Sheets.");
+          }
+          this.renderTeacherTable();
+        } finally {
+          if (btnManual && isManual) {
+            btnManual.disabled = false;
+            if (icon) icon.className = "fa-solid fa-arrows-rotate text-xs";
+          }
+        }
+      },
+
+      computeTotalScore(sbh, zhr, asr, mgb, isy) {
+        const getScore = (val) => {
+          if (!val) return 0;
+          if (typeof val === 'number') return val;
+          const s = String(val).toLowerCase();
+          if (s.includes('jamaah') || s.includes('berjamaah')) return 3;
+          if (s.includes('sendiri') || s.includes('munfarid')) return 2;
+          if (s.includes('haiz')) return 3;
+          return 0;
+        };
+        return getScore(sbh) + getScore(zhr) + getScore(asr) + getScore(mgb) + getScore(isy);
+      },
+
+      showSyncNotification(msg) {
+        let toast = document.getElementById('dimasSyncToast');
+        if (!toast) {
+          toast = document.createElement('div');
+          toast.id = 'dimasSyncToast';
+          toast.className = 'fixed bottom-5 right-5 z-50 max-w-sm p-4 bg-slate-900 text-white rounded-2xl shadow-2xl border border-emerald-500/40 text-xs font-bold flex items-center gap-3 transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-none';
+          document.body.appendChild(toast);
+        }
+        toast.innerHTML = `<i class="fa-solid fa-cloud-arrow-down text-emerald-400 text-base shrink-0"></i><span>${msg}</span>`;
+        toast.classList.remove('translate-y-2', 'opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+          toast.classList.add('translate-y-2', 'opacity-0', 'pointer-events-none');
+        }, 3500);
       },
 
       generateSampleReports() {
