@@ -237,7 +237,7 @@ function doGet(e) {
 
 URL Web App resmi Bapak Guru telah terintegrasi di berkas `index.html`:
 ```javascript
-const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5dN7Rba5lnIYDjdOTeLuQivjsBiXNvFLPETQhG-6SKDnaQzSEO_NcVe7mjGFS5x3NFw/exec";
+const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhdx6KnRZMABTKqA-73G60GbPGEWJgXb5l1ND0iyEEcumODatv4mMcH8Mf8hRQy4K2Yw/exec";
 ```
 - **Pengiriman Siswa (POST)**: Setiap kali siswa mengisi laporan salat di form DIMAS, data dikirim secara *real-time* ke URL ini (`mode: 'no-cors'`) dan otomatis masuk ke Google Spreadsheet Bapak Guru.
 - **Pengambilan Guru (GET)**: Dashboard Guru secara otomatis memanggil fungsi `loadAdminData()` untuk mengambil data rekapitulasi dari Google Sheets via `fetch(GOOGLE_APPS_SCRIPT_URL)` sehingga Bapak Guru selalu melihat data teranyar.

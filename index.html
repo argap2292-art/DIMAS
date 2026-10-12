@@ -1139,11 +1139,11 @@ function doGet(e) {
     var ss = SPREADSHEET_ID ? SpreadsheetApp.openById(SPREADSHEET_ID) : SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName(SHEET_NAME) || (initialSetup(), ss.getSheetByName(SHEET_NAME));
     var values = sheet.getDataRange().getValues();
-    if (values.length <= 1) {
+    if (values.length &lt;= 1) {
       return ContentService.createTextOutput(JSON.stringify({ status: "active", count: 0, reports: [] })).setMimeType(ContentService.MimeType.JSON);
     }
     var reports = [];
-    for (var i = 1; i < values.length; i++) {
+    for (var i = 1; i &lt; values.length; i++) {
       var row = values[i];
       if (!row[1] && !row[4]) continue;
       reports.push({
@@ -1186,7 +1186,7 @@ function doGet(e) {
      * URL Web App resmi terpasang aktif untuk pengiriman & pembacaan data salat siswa.
      * =========================================================================
      */
-    const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5dN7Rba5lnIYDjdOTeLuQivjsBiXNvFLPETQhG-6SKDnaQzSEO_NcVe7mjGFS5x3NFw/exec";
+    const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhdx6KnRZMABTKqA-73G60GbPGEWJgXb5l1ND0iyEEcumODatv4mMcH8Mf8hRQy4K2Yw/exec";
     const GOOGLE_SCRIPT_URL = GOOGLE_APPS_SCRIPT_URL; // Alias untuk kompatibilitas internal
 
     /**
@@ -2384,10 +2384,49 @@ function doGet(e) {
                 return 0;
               };
 
+              // Normalisasi format tanggal (termasuk ISO UTC dari Google Sheets menjadi WIB)
+              const normalizeDate = (raw) => {
+                if (!raw) return PROGRAM_DATE_RANGE.min;
+                if (typeof raw === 'string') {
+                  const trimmed = raw.trim();
+                  if (trimmed.includes('T')) {
+                    try {
+                      const dObj = new Date(trimmed);
+                      if (!isNaN(dObj.getTime())) {
+                        return new Intl.DateTimeFormat('en-CA', {
+                          timeZone: 'Asia/Jakarta',
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit'
+                        }).format(dObj);
+                      }
+                    } catch (e) {}
+                    return trimmed.split('T')[0];
+                  }
+                  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+                    return trimmed.substring(0, 10);
+                  }
+                  return trimmed;
+                }
+                if (raw instanceof Date && !isNaN(raw.getTime())) {
+                  try {
+                    return new Intl.DateTimeFormat('en-CA', {
+                      timeZone: 'Asia/Jakarta',
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit'
+                    }).format(raw);
+                  } catch (e) {
+                    return raw.toISOString().split('T')[0];
+                  }
+                }
+                return String(raw);
+              };
+
               // Format setiap baris data siswa agar seragam
               const formatted = rawData.map((item, idx) => {
                 const nama = item.namaSiswa || item.nama || item['Nama Siswa'] || item.Nama || `Siswa ${idx + 1}`;
-                const tgl = item.tanggal || item.Tanggal || item['Tanggal'] || PROGRAM_DATE_RANGE.min;
+                const tgl = normalizeDate(item.tanggal || item.Tanggal || item['Tanggal']);
                 const kls = item.kelas || item.Kelas || item['Kelas'] || 'Kelas 1';
                 const gnd = item.gender || item.JenisKelamin || item['Jenis Kelamin'] || 'Laki-laki';
                 const sbh = item.subuh || item.Subuh || item['Salat Subuh'] || 'Tidak Salat';
@@ -2399,7 +2438,7 @@ function doGet(e) {
                 const poin = item.totalPoin !== undefined ? Number(item.totalPoin) :
                              (item['Total Poin'] !== undefined ? Number(item['Total Poin']) : 
                               this.computeTotalScore(sbh, zhr, asr, mgb, isy));
-                const haiz = (sbh && String(sbh).includes('Haiz')) || (item.isHaiz === true);
+                const haiz = (sbh && String(sbh).toLowerCase().includes('haiz')) || (item.isHaiz === true);
 
                 return {
                   id: item.id || `gas_${tgl}_${nama}_${kls}`.replace(/[^a-zA-Z0-9_]/g, '_'),
@@ -2428,20 +2467,22 @@ function doGet(e) {
                 };
               });
 
-              // Masukkan array data siswa ke dalam rekapitulasi lokal (update jika tanggal, nama, kelas sama)
+              // Jika ada data nyata dari Google Sheets, gantikan data demo/placeholder
+              let baseReports = this.reports.filter(r => !String(r.id).startsWith('rep_demo_'));
               if (formatted.length > 0) {
                 formatted.forEach(f => {
-                  const existingIdx = this.reports.findIndex(r => 
+                  const existingIdx = baseReports.findIndex(r => 
                     r.tanggal === f.tanggal && 
                     r.nama.toLowerCase() === f.nama.toLowerCase() && 
                     r.kelas === f.kelas
                   );
                   if (existingIdx >= 0) {
-                    this.reports[existingIdx] = { ...this.reports[existingIdx], ...f };
+                    baseReports[existingIdx] = { ...baseReports[existingIdx], ...f };
                   } else {
-                    this.reports.unshift(f);
+                    baseReports.unshift(f);
                   }
                 });
+                this.reports = baseReports;
               }
 
               this.saveReportsToStorage();
