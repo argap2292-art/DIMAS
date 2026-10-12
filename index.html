@@ -992,6 +992,10 @@
         <p id="modalHadisQuote" class="text-[11px] text-emerald-900 font-medium italic pt-1 border-t border-emerald-200 leading-relaxed">
           "Salat lima waktu menghapuskan dosa-dosa kecil di antara waktu-waktu tersebut selama dosa besar dijauhi." (HR. Muslim)
         </p>
+        <div id="modalSyncStatus" class="flex items-center justify-between text-[11px] font-bold pt-1.5 border-t border-emerald-200/80">
+          <span class="text-slate-500">Status Google Sheets:</span>
+          <span id="modalSyncBadge" class="text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">Tersimpan</span>
+        </div>
       </div>
 
       <div class="pt-2 flex items-center justify-center gap-3">
@@ -1025,50 +1029,66 @@
       <div class="space-y-3 text-xs text-slate-600 leading-relaxed font-medium">
         <div class="p-3 bg-teal-50 rounded-2xl border-2 border-teal-200 text-teal-900">
           <p class="font-extrabold mb-1">Status Integrasi Saat Ini:</p>
-          <p>Variabel <code class="bg-white px-2 py-0.5 rounded-md border border-teal-300 font-mono text-teal-800 font-bold">GOOGLE_SCRIPT_URL</code> berada di baris pertama script. Laporan otomatis tersimpan di memori lokal peramban (localStorage) dan dikirim ke Google Sheets jika URL aktif.</p>
+          <p>Variabel <code class="bg-white px-2 py-0.5 rounded-md border border-teal-300 font-mono text-teal-800 font-bold">GOOGLE_APPS_SCRIPT_URL</code> berada di baris pertama skrip JavaScript. Setiap laporan salat akan dikirim ke Google Sheets dan otomatis disimpan salinannya di memori lokal peramban (localStorage).</p>
         </div>
 
-        <h4 class="font-black text-slate-800 text-sm pt-1">Langkah 3 Menit Menghubungkan Google Spreadsheet:</h4>
+        <h4 class="font-black text-slate-800 text-sm pt-1">Langkah Menghubungkan Google Spreadsheet:</h4>
         <ol class="list-decimal list-inside space-y-1.5 pl-1">
-          <li>Buka <strong>Google Sheets</strong> baru, beri judul <em>"Rekap DIMAS SDN 1 Candi Ponorogo"</em>.</li>
+          <li>Buka <strong>Google Sheets</strong> baru (contoh: <em>"Rekap Pembiasaan Salat DIMAS"</em>).</li>
           <li>Klik menu <strong>Extensions (Ekstensi)</strong> &rarr; <strong>Apps Script</strong>.</li>
-          <li>Hapus kode bawaan, lalu tempelkan kode berikut:</li>
+          <li>Hapus kode bawaan di <code>Code.gs</code>, lalu tempelkan kode berikut:</li>
         </ol>
 
         <div class="relative">
           <pre class="bg-slate-900 text-slate-100 p-3.5 rounded-2xl text-[11px] font-mono overflow-x-auto custom-scroll selection:bg-emerald-600">
+// ID Spreadsheet (Opsional, kosongkan jika script berada di dalam Google Sheets)
+const SPREADSHEET_ID = "";
+const SHEET_NAME = "Rekap_Salat_DIMAS";
+
+function initialSetup() {
+  var ss = SPREADSHEET_ID ? SpreadsheetApp.openById(SPREADSHEET_ID) : SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+  var headers = [
+    "Timestamp", "Nama Siswa", "Kelas", "Jenis Kelamin", "Tanggal", 
+    "Salat Subuh", "Salat Zuhur", "Salat Asar", "Salat Magrib", "Salat Isya", 
+    "Total Poin", "Keterangan/Catatan"
+  ];
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  sheet.getRange(1, 1, 1, headers.length)
+    .setBackground("#15803d").setFontColor("#ffffff").setFontWeight("bold").setHorizontalAlignment("center");
+  sheet.setFrozenRows(1);
+}
+
 function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(15000);
   try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        "Waktu Kirim", "Sekolah", "Tanggal Salat", "Nama Siswa", "Kelas", 
-        "Jenis Kelamin", "Status Haiz", "Subuh", "Zuhur", 
-        "Asar", "Magrib", "Isya", "Total Poin", "Catatan"
-      ]);
-    }
+    var ss = SPREADSHEET_ID ? SpreadsheetApp.openById(SPREADSHEET_ID) : SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(SHEET_NAME) || (initialSetup(), ss.getSheetByName(SHEET_NAME));
     var data = JSON.parse(e.postData.contents);
+    var timestamp = Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyy-MM-dd HH:mm:ss");
     sheet.appendRow([
-      new Date(), "SDN 1 Candi", data.tanggal, data.nama, data.kelas,
-      data.gender, data.isHaiz ? "Haiz" : "-",
-      data.subuh, data.zuhur, data.asar, data.magrib, data.isya,
-      data.totalPoin, data.catatan || ""
+      timestamp, data.nama || "", data.kelas || "", data.gender || "", data.tanggal || "",
+      data.subuh || "Tidak Salat", data.zuhur || "Tidak Salat", data.asar || "Tidak Salat",
+      data.magrib || "Tidak Salat", data.isya || "Tidak Salat",
+      Number(data.totalPoin || 0), data.catatan || ""
     ]);
-    return ContentService.createTextOutput(
-      JSON.stringify({ status: "success" })
-    ).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ status: "success", message: "Data tersimpan" }))
+      .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ status: "error", message: err.toString() })
-    ).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
   }
 }</pre>
         </div>
 
         <ol start="4" class="list-decimal list-inside space-y-1.5 pl-1">
-          <li>Klik tombol <strong>Deploy (Terapkan)</strong> &rarr; <strong>New Deployment</strong>.</li>
-          <li>Pilih jenis <strong>Web App</strong>. Set <em>Who has access</em> ke <strong>"Anyone" (Siapa saja)</strong>.</li>
-          <li>Salin Web App URL, lalu tempelkan ke variabel <code class="font-mono bg-slate-100 px-1 py-0.5 rounded text-emerald-800">GOOGLE_SCRIPT_URL</code>.</li>
+          <li>Pilih fungsi <code>initialSetup</code> di editor lalu klik <strong>Run</strong> untuk membuat judul kolom.</li>
+          <li>Klik tombol <strong>Deploy (Terapkan)</strong> &rarr; <strong>New Deployment</strong> &rarr; jenis <strong>Web App</strong>.</li>
+          <li>Pilih <em>Who has access</em> ke <strong>"Anyone" (Siapa saja)</strong> lalu klik Deploy.</li>
+          <li>Salin Web App URL (berakhiran <code>/exec</code>), lalu tempelkan ke variabel <code class="font-mono bg-slate-100 px-1 py-0.5 rounded text-emerald-800">GOOGLE_APPS_SCRIPT_URL</code> di <code>index.html</code>.</li>
         </ol>
       </div>
 
@@ -1087,10 +1107,11 @@ function doPost(e) {
     /**
      * =========================================================================
      * VARIABEL GLOBAL INTEGRASI GOOGLE APPS SCRIPT / GOOGLE SHEETS
-     * Ganti string di bawah ini dengan URL Web App hasil deploy Google Apps Script Anda.
+     * URL Web App resmi terpasang aktif untuk pengiriman data salat siswa.
      * =========================================================================
      */
-    const GOOGLE_SCRIPT_URL = "URL_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI";
+    const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbww4JvG5r72yjRqmKiPei_H8oB5DibI_UKKPvThdC9VVSM0CtLYJ43Gg5KkayytmpEfjA/exec";
+    const GOOGLE_SCRIPT_URL = GOOGLE_APPS_SCRIPT_URL; // Alias untuk kompatibilitas internal
 
     /**
      * Identitas Resmi Lembaga Sekolah
@@ -1780,27 +1801,35 @@ function doPost(e) {
           totalPoin += (this.dailySelections[p.id]?.score || 0);
         });
 
-        const reportData = {
-          id: 'rep_' + Date.now(),
+        // 1. Siapkan Objek Data Formulir Siswa untuk Google Sheets
+        const formData = {
           timestamp: new Date().toISOString(),
-          sekolah: "SD Negeri 1 Candi",
-          tanggal: dateVal,
-          nama: this.currentStudent.name,
+          namaSiswa: this.currentStudent.name,
+          nama: this.currentStudent.name, // Kompatibilitas ganda
           kelas: this.currentStudent.className,
           gender: this.currentStudent.gender,
-          isHaiz: this.isHaiz,
-          subuh: this.dailySelections.subuh?.status || 'Tidak Salat',
-          subuhPoin: this.dailySelections.subuh?.score || 0,
-          zuhur: this.dailySelections.zuhur?.status || 'Tidak Salat',
-          zuhurPoin: this.dailySelections.zuhur?.score || 0,
-          asar: this.dailySelections.asar?.status || 'Tidak Salat',
-          asarPoin: this.dailySelections.asar?.score || 0,
-          magrib: this.dailySelections.magrib?.status || 'Tidak Salat',
-          magribPoin: this.dailySelections.magrib?.score || 0,
-          isya: this.dailySelections.isya?.status || 'Tidak Salat',
-          isyaPoin: this.dailySelections.isya?.score || 0,
+          tanggal: dateVal,
+          subuh: this.isHaiz ? "Dispensasi Syar'i (Haiz)" : (this.dailySelections.subuh?.status || 'Tidak Salat'),
+          zuhur: this.isHaiz ? "Dispensasi Syar'i (Haiz)" : (this.dailySelections.zuhur?.status || 'Tidak Salat'),
+          asar: this.isHaiz ? "Dispensasi Syar'i (Haiz)" : (this.dailySelections.asar?.status || 'Tidak Salat'),
+          magrib: this.isHaiz ? "Dispensasi Syar'i (Haiz)" : (this.dailySelections.magrib?.status || 'Tidak Salat'),
+          isya: this.isHaiz ? "Dispensasi Syar'i (Haiz)" : (this.dailySelections.isya?.status || 'Tidak Salat'),
+          keterangan: notesVal || (this.isHaiz ? "Sedang berhalangan (Haiz)" : "-"),
+          catatan: notesVal || (this.isHaiz ? "Sedang berhalangan (Haiz)" : "-"), // Kompatibilitas ganda
           totalPoin: totalPoin,
-          catatan: notesVal
+          isHaiz: this.isHaiz,
+          sekolah: SCHOOL_INFO.name
+        };
+
+        // 2. Simpan cadangan ke localStorage agar data tidak hilang (offline-first)
+        const reportData = {
+          id: 'rep_' + Date.now(),
+          ...formData,
+          subuhPoin: this.dailySelections.subuh?.score || 0,
+          zuhurPoin: this.dailySelections.zuhur?.score || 0,
+          asarPoin: this.dailySelections.asar?.score || 0,
+          magribPoin: this.dailySelections.magrib?.score || 0,
+          isyaPoin: this.dailySelections.isya?.score || 0
         };
 
         const existingIdx = this.reports.findIndex(r => 
@@ -1817,52 +1846,68 @@ function doPost(e) {
 
         this.saveReportsToStorage();
 
+        // 3. Indikator Loading & Nonaktifkan Tombol Simpan
         const btnSave = document.getElementById('btnSaveReport');
         const originalBtnHTML = btnSave.innerHTML;
         btnSave.disabled = true;
-        btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xl"></i><span>Menyimpan & Menyinkronkan...</span>`;
+        btnSave.classList.add('opacity-75', 'cursor-not-allowed');
+        btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xl"></i><span>Mengirim Laporan ke Google Sheets...</span>`;
 
-        this.sendToGoogleSheets(reportData);
+        let isCloudSynced = false;
 
-        setTimeout(() => {
-          btnSave.disabled = false;
-          btnSave.innerHTML = originalBtnHTML;
-          this.showAppreciationModal(reportData);
-          this.renderStudentHistory();
-        }, 500);
-      },
-
-      async sendToGoogleSheets(payload) {
-        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("URL_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI")) {
-          console.info("[DIMAS SDN 1 Candi] GOOGLE_SCRIPT_URL belum diisi. Data tersimpan aman di localStorage.");
-          return;
-        }
-
+        // 4. Kirim Data Form Siswa via fetch() ke GOOGLE_APPS_SCRIPT_URL
         try {
-          await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload)
-          });
-          console.log("[DIMAS SDN 1 Candi] Data berhasil dikirim ke Google Sheets.");
+          if (GOOGLE_APPS_SCRIPT_URL && !GOOGLE_APPS_SCRIPT_URL.includes("ISI_URL_WEB_APP_ANDA_DISINI")) {
+            await fetch(GOOGLE_APPS_SCRIPT_URL, {
+              method: 'POST',
+              mode: 'no-cors', // Menghindari pemblokiran CORS saat redirect di Google Apps Script
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(formData)
+            });
+            isCloudSynced = true;
+            console.log("[DIMAS] Data berhasil dikirim ke Google Apps Script Web App.");
+          } else {
+            console.info("[DIMAS] GOOGLE_APPS_SCRIPT_URL belum disetel. Laporan tersimpan di memori perangkat.");
+          }
         } catch (error) {
-          console.warn("[DIMAS SDN 1 Candi] Gagal mengirim ke Google Sheets:", error);
+          console.warn("[DIMAS] Gagal mengirim ke Google Apps Script:", error);
+        } finally {
+          // Pulihkan tombol simpan
+          btnSave.disabled = false;
+          btnSave.classList.remove('opacity-75', 'cursor-not-allowed');
+          btnSave.innerHTML = originalBtnHTML;
+
+          // 5. Tampilkan Modal Apresiasi, Notifikasi Sukses & Animasi Confetti
+          this.showAppreciationModal(reportData, isCloudSynced);
+          this.renderStudentHistory();
         }
       },
 
-      showAppreciationModal(data) {
+      showAppreciationModal(data, isCloudSynced = false) {
         document.getElementById('modalStudentName').textContent = data.nama;
         document.getElementById('modalScoreValue').textContent = `${data.totalPoin} / 15 Poin`;
 
         const pct = Math.round((data.totalPoin / 15) * 100);
         document.getElementById('modalScoreBar').style.width = `${pct}%`;
 
+        // Update badge status penyimpanan Google Sheets
+        const badge = document.getElementById('modalSyncBadge');
+        if (badge) {
+          if (isCloudSynced) {
+            badge.className = "text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1";
+            badge.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-emerald-600"></i> Terkirim ke Google Sheets`;
+          } else {
+            badge.className = "text-amber-900 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-full flex items-center gap-1";
+            badge.innerHTML = `<i class="fa-solid fa-hard-drive text-amber-600"></i> Tersimpan di Memori Lokal`;
+          }
+        }
+
         const modal = document.getElementById('modalAppreciation');
         modal.classList.remove('hidden');
 
+        // Animasi Selebrasi Bintang / Confetti
         this.triggerConfetti();
       },
 
