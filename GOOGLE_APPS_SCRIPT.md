@@ -214,6 +214,7 @@ function doGet(e) {
         app: "DIMAS - Pembiasaan Salat Fardu SDN 1 Candi",
         message: "Berhasil mengambil data laporan salat peserta didik.",
         count: reports.length,
+        data: reports,
         reports: reports
       }))
       .setMimeType(ContentService.MimeType.JSON);
@@ -236,8 +237,28 @@ function doGet(e) {
 
 URL Web App resmi Bapak Guru telah terintegrasi di berkas `index.html`:
 ```javascript
-const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbww4JvG5r72yjRqmKiPei_H8oB5DibI_UKKPvThdC9VVSM0CtLYJ43Gg5KkayytmpEfjA/exec";
+const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5dN7Rba5lnIYDjdOTeLuQivjsBiXNvFLPETQhG-6SKDnaQzSEO_NcVe7mjGFS5x3NFw/exec";
 ```
 - **Pengiriman Siswa (POST)**: Setiap kali siswa mengisi laporan salat di form DIMAS, data dikirim secara *real-time* ke URL ini (`mode: 'no-cors'`) dan otomatis masuk ke Google Spreadsheet Bapak Guru.
-- **Pengambilan Guru (GET)**: Dashboard Guru secara otomatis mengambil data rekapitulasi dari Google Sheets via `fetch(GOOGLE_APPS_SCRIPT_URL)` sehingga Bapak Guru selalu melihat data teranyar.
+- **Pengambilan Guru (GET)**: Dashboard Guru secara otomatis memanggil fungsi `loadAdminData()` untuk mengambil data rekapitulasi dari Google Sheets via `fetch(GOOGLE_APPS_SCRIPT_URL)` sehingga Bapak Guru selalu melihat data teranyar.
+- **Tombol Refresh Data**: Tersedia tombol manual "Refresh Data" di Dashboard Guru untuk sinkronisasi kapan pun diperlukan.
+
+---
+
+### 3️⃣ ⚠️ Solusi Error: `ReferenceError: scriptProp is not defined`
+Jika saat membuka Dashboard atau mengakses URL muncul pesan:
+`{"status":"error","message":"ReferenceError: scriptProp is not defined"}`
+
+Penyebab: Variabel `scriptProp` dipanggil di dalam fungsi `doGet()` atau `doPost()`, namun belum dideklarasikan di bagian atas script.
+
+**Cara Memperbaikinya di Google Apps Script (2 Menit):**
+1. Buka Spreadsheet &rarr; **Ekstensi** &rarr; **Apps Script**.
+2. Di baris paling atas (baris ke-1 sebelum fungsi apa pun), tambahkan baris berikut:
+   ```javascript
+   var scriptProp = PropertiesService.getScriptProperties();
+   ```
+   *ATAU* lebih mudah lagi: Ganti seluruh kode `Code.gs` dengan kode lengkap di bagian **1️⃣ Salin Kode Script Berikut** pada panduan ini (kode di atas menggunakan `SpreadsheetApp.getActiveSpreadsheet()` langsung sehingga tidak memerlukan `scriptProp` sama sekali).
+3. Klik ikon **Simpan** (💾).
+4. Klik tombol biru **Terapkan (Deploy)** &rarr; **Kelola Penerapan (Manage Deployments)** &rarr; klik ikon pensil (Edit) &rarr; ubah Versi ke **Versi Baru (New Version)** &rarr; klik **Terapkan (Deploy)**.
+
 

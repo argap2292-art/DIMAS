@@ -743,10 +743,29 @@
               </p>
             </div>
           </div>
-          <button id="btnManualSyncGas" onclick="app.fetchReportsFromGoogleSheets(true)" title="Sinkronkan data dari Google Sheets sekarang"
+          <button id="btnManualSyncGas" onclick="app.loadAdminData(true)" title="Refresh data dari Google Sheets sekarang"
             class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs transition-all shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer">
             <i id="btnManualSyncIcon" class="fa-solid fa-arrows-rotate text-xs"></i>
-            <span class="hidden sm:inline">Sinkronkan</span>
+            <span class="hidden sm:inline">Refresh Data</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Alert Banner Jika Ada Catatan/Pesan dari Google Apps Script -->
+      <div id="gasErrorAlertBox" class="hidden p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-900 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div class="flex items-start gap-2.5">
+          <i class="fa-solid fa-triangle-exclamation text-amber-600 text-base mt-0.5 shrink-0"></i>
+          <div>
+            <p class="font-bold text-amber-950" id="gasErrorAlertTitle">Pemberitahuan Google Apps Script</p>
+            <p class="text-amber-800 text-[11px] mt-0.5" id="gasErrorAlertDesc">Sedang memproses...</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="app.openSheetGuideModal()" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs cursor-pointer shadow-2xs">
+            <i class="fa-solid fa-book-open mr-1"></i>Lihat Solusi Code.gs
+          </button>
+          <button onclick="document.getElementById('gasErrorAlertBox').classList.add('hidden')" class="text-amber-700 hover:text-amber-900 px-2 py-1 text-xs cursor-pointer">
+            Tutup
           </button>
         </div>
       </div>
@@ -824,12 +843,12 @@
           </h3>
 
           <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="app.fetchReportsFromGoogleSheets(true)" class="px-3 py-1.5 text-xs font-bold text-teal-900 bg-teal-100 hover:bg-teal-200 border border-teal-300 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer">
-              <i class="fa-solid fa-cloud-arrow-down"></i>
-              <span>Sinkronkan Sheets</span>
+            <button onclick="app.loadAdminData(true)" class="px-3.5 py-1.5 text-xs font-black text-emerald-950 bg-emerald-100 hover:bg-emerald-200 border-2 border-emerald-300 rounded-xl transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-arrows-rotate text-emerald-700"></i>
+              <span>Refresh Data</span>
             </button>
-            <button onclick="app.populateDemoData()" class="px-3 py-1.5 text-xs font-bold text-emerald-900 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 rounded-xl transition-colors flex items-center gap-1.5">
-              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <button onclick="app.populateDemoData()" class="px-3 py-1.5 text-xs font-bold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-colors flex items-center gap-1.5">
+              <i class="fa-solid fa-wand-magic-sparkles text-emerald-600"></i>
               <span>Isi Data Demo</span>
             </button>
             <button onclick="app.confirmClearAllData()" class="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-colors flex items-center gap-1.5">
@@ -1134,7 +1153,7 @@ function doGet(e) {
         totalPoin: Number(row[10] || 0), keterangan: row[11] || "-", catatan: row[11] || "-"
       });
     }
-    return ContentService.createTextOutput(JSON.stringify({ status: "success", count: reports.length, reports: reports })).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ status: "success", count: reports.length, data: reports, reports: reports })).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() })).setMimeType(ContentService.MimeType.JSON);
   }
@@ -1164,10 +1183,10 @@ function doGet(e) {
     /**
      * =========================================================================
      * VARIABEL GLOBAL INTEGRASI GOOGLE APPS SCRIPT / GOOGLE SHEETS
-     * URL Web App resmi terpasang aktif untuk pengiriman data salat siswa.
+     * URL Web App resmi terpasang aktif untuk pengiriman & pembacaan data salat siswa.
      * =========================================================================
      */
-    const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbww4JvG5r72yjRqmKiPei_H8oB5DibI_UKKPvThdC9VVSM0CtLYJ43Gg5KkayytmpEfjA/exec";
+    const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5dN7Rba5lnIYDjdOTeLuQivjsBiXNvFLPETQhG-6SKDnaQzSEO_NcVe7mjGFS5x3NFw/exec";
     const GOOGLE_SCRIPT_URL = GOOGLE_APPS_SCRIPT_URL; // Alias untuk kompatibilitas internal
 
     /**
@@ -1255,8 +1274,8 @@ function doGet(e) {
         this.renderTeacherTable();
         this.rotateMotivationalQuote();
 
-        // Otomatis sinkronkan data laporan dari Google Apps Script Web App (doGet)
-        this.fetchReportsFromGoogleSheets(false);
+        // Otomatis sinkronkan data rekapitulasi dari Google Sheets via loadAdminData (doGet)
+        this.loadAdminData(false);
 
         if (this.currentStudent && this.currentStudent.name) {
           this.applyStudentInfoToUI();
@@ -1350,9 +1369,8 @@ function doGet(e) {
         }
 
         if (viewName === 'teacher-dashboard') {
-          this.renderTeacherTable();
-          // Otomatis sinkronkan data terbaru setiap kali guru membuka dashboard
-          this.fetchReportsFromGoogleSheets(false);
+          // Otomatis sinkronkan dan tampilkan data rekapitulasi dari Google Sheets
+          this.loadAdminData(false);
         } else if (viewName === 'student-dashboard') {
           this.loadStudentReportForDate(this.selectedDate);
           this.renderStudentHistory();
@@ -2287,9 +2305,13 @@ function doGet(e) {
       },
 
       /**
-       * Mengambil data rekapitulasi salat siswa secara otomatis dari Google Apps Script Web App (doGet)
+       * Mengambil data rekapitulasi salat siswa secara otomatis dari Google Sheets via GET (fetch)
+       * Memperbarui tabel rekapitulasi dan kartu ringkasan statistik
+       * @param {boolean} isManual - apakah dipicu manual via tombol "Refresh Data"
        */
-      async fetchReportsFromGoogleSheets(isManual = false) {
+      loadAdminData(isManual = false) {
+        const tbody = document.getElementById('teacherTableBody');
+        const emptyState = document.getElementById('teacherTableEmpty');
         const btnManual = document.getElementById('btnManualSyncGas');
         const icon = document.getElementById('btnManualSyncIcon');
         const badge = document.getElementById('gasSyncStatusBadge');
@@ -2302,160 +2324,196 @@ function doGet(e) {
 
         if (badge) {
           badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
-          badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[8px] mr-1"></i>Menghubungkan...`;
+          badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[8px] mr-1"></i>Memuat data dari Google Sheets...`;
         }
 
-        try {
-          // Buat URL dengan parameter anti-cache dan action query
-          const targetUrl = GOOGLE_APPS_SCRIPT_URL + (GOOGLE_APPS_SCRIPT_URL.includes('?') ? '&' : '?') + 'action=getReports&_t=' + Date.now();
-          
-          const response = await fetch(targetUrl, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json'
+        // 1. Tampilkan status/indikator "Memuat data dari Google Sheets..." pada tabel rekapitulasi
+        if (emptyState) emptyState.classList.add('hidden');
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr id="tableLoadingRow">
+              <td colspan="13" class="py-12 px-4 text-center bg-emerald-50/40">
+                <div class="flex flex-col items-center justify-center gap-2.5">
+                  <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shadow-xs">
+                    <i class="fa-solid fa-spinner fa-spin text-lg"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-black text-emerald-950">Memuat data dari Google Sheets...</p>
+                    <p class="text-[11px] text-slate-500 font-medium mt-0.5">Mengambil dan menyinkronkan rekapitulasi salat SDN 1 Candi Ponorogo</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          `;
+        }
+
+        // 2. Ambil data rekapitulasi dari Google Sheets via metode GET (fetch)
+        fetch(GOOGLE_APPS_SCRIPT_URL)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+          })
+          .then(result => {
+            console.log("[DIMAS] Respon dari Google Apps Script (doGet):", result);
+
+            // Deteksi array data siswa (mendukung result.data, result.reports, atau jika result langsung array)
+            let rawData = null;
+            if (result && result.status === 'success' && Array.isArray(result.data)) {
+              rawData = result.data;
+            } else if (result && result.status === 'success' && Array.isArray(result.reports)) {
+              rawData = result.reports;
+            } else if (Array.isArray(result)) {
+              rawData = result;
+            } else if (result && Array.isArray(result.data)) {
+              rawData = result.data;
+            }
+
+            if (rawData !== null) {
+              // Sembunyikan notifikasi error jika sebelumnya muncul
+              const errAlert = document.getElementById('gasErrorAlertBox');
+              if (errAlert) errAlert.classList.add('hidden');
+
+              const parseScore = (status) => {
+                if (!status) return 0;
+                const s = String(status).toLowerCase();
+                if (s.includes('jamaah') || s.includes('berjamaah')) return 3;
+                if (s.includes('munfarid') || s.includes('sendiri')) return 2;
+                if (s.includes('haiz')) return 3;
+                return 0;
+              };
+
+              // Format setiap baris data siswa agar seragam
+              const formatted = rawData.map((item, idx) => {
+                const nama = item.namaSiswa || item.nama || item['Nama Siswa'] || item.Nama || `Siswa ${idx + 1}`;
+                const tgl = item.tanggal || item.Tanggal || item['Tanggal'] || PROGRAM_DATE_RANGE.min;
+                const kls = item.kelas || item.Kelas || item['Kelas'] || 'Kelas 1';
+                const gnd = item.gender || item.JenisKelamin || item['Jenis Kelamin'] || 'Laki-laki';
+                const sbh = item.subuh || item.Subuh || item['Salat Subuh'] || 'Tidak Salat';
+                const zhr = item.zuhur || item.Zuhur || item['Salat Zuhur'] || 'Tidak Salat';
+                const asr = item.asar || item.Asar || item['Salat Asar'] || 'Tidak Salat';
+                const mgb = item.magrib || item.Magrib || item['Salat Magrib'] || 'Tidak Salat';
+                const isy = item.isya || item.Isya || item['Salat Isya'] || 'Tidak Salat';
+                const ket = item.keterangan || item.catatan || item['Keterangan/Catatan'] || item.Catatan || '-';
+                const poin = item.totalPoin !== undefined ? Number(item.totalPoin) :
+                             (item['Total Poin'] !== undefined ? Number(item['Total Poin']) : 
+                              this.computeTotalScore(sbh, zhr, asr, mgb, isy));
+                const haiz = (sbh && String(sbh).includes('Haiz')) || (item.isHaiz === true);
+
+                return {
+                  id: item.id || `gas_${tgl}_${nama}_${kls}`.replace(/[^a-zA-Z0-9_]/g, '_'),
+                  timestamp: item.timestamp || item.Timestamp || new Date().toISOString(),
+                  namaSiswa: nama,
+                  nama: nama,
+                  kelas: kls,
+                  gender: gnd,
+                  tanggal: tgl,
+                  subuh: sbh,
+                  subuhPoin: parseScore(sbh),
+                  zuhur: zhr,
+                  zuhurPoin: parseScore(zhr),
+                  asar: asr,
+                  asarPoin: parseScore(asr),
+                  magrib: mgb,
+                  magribPoin: parseScore(mgb),
+                  isya: isy,
+                  isyaPoin: parseScore(isy),
+                  keterangan: ket,
+                  catatan: ket,
+                  totalPoin: poin,
+                  isHaiz: haiz,
+                  sekolah: SCHOOL_INFO.name,
+                  source: 'google-sheets'
+                };
+              });
+
+              // Masukkan array data siswa ke dalam rekapitulasi lokal (update jika tanggal, nama, kelas sama)
+              if (formatted.length > 0) {
+                formatted.forEach(f => {
+                  const existingIdx = this.reports.findIndex(r => 
+                    r.tanggal === f.tanggal && 
+                    r.nama.toLowerCase() === f.nama.toLowerCase() && 
+                    r.kelas === f.kelas
+                  );
+                  if (existingIdx >= 0) {
+                    this.reports[existingIdx] = { ...this.reports[existingIdx], ...f };
+                  } else {
+                    this.reports.unshift(f);
+                  }
+                });
+              }
+
+              this.saveReportsToStorage();
+
+              // Perbarui tabel rekapitulasi dan kartu ringkasan statistik (Total Laporan, Rata-Rata Poin, Salat Berjamaah, Siswa Terdata)
+              this.renderTeacherTable();
+
+              const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+              if (badge) {
+                badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+                badge.innerHTML = `<i class="fa-solid fa-check text-[8px] text-emerald-600 mr-1"></i>Tersinkron (${rawData.length} Data)`;
+              }
+              if (timeText) {
+                timeText.textContent = `Tersinkron pukul ${nowTime} WIB (${rawData.length} data Google Sheets)`;
+              }
+
+              if (isManual) {
+                this.showSyncNotification(`Alhamdulillah! Berhasil memperbarui ${rawData.length} data salat dari Google Sheets.`);
+              }
+            } else if (result && result.status === 'error') {
+              console.warn("[DIMAS] Catatan Respons Google Apps Script:", result.message);
+              const errAlert = document.getElementById('gasErrorAlertBox');
+              const errTitle = document.getElementById('gasErrorAlertTitle');
+              const errDesc = document.getElementById('gasErrorAlertDesc');
+              if (errAlert && errTitle && errDesc) {
+                errTitle.textContent = "Google Apps Script Membutuhkan Pengaturan Code.gs";
+                errDesc.innerHTML = `Pesan dari Apps Script: <code class="font-bold bg-amber-100 px-1 py-0.5 rounded text-amber-900">${result.message}</code>.<br>${result.message.includes('scriptProp') ? 'Pastikan <b>var scriptProp = PropertiesService.getScriptProperties();</b> dideklarasikan di baris paling atas Code.gs Anda atau salin kode resmi di menu Panduan.' : 'Periksa kembali script spreadsheet Anda.'}`;
+                errAlert.classList.remove('hidden');
+              }
+
+              if (badge) {
+                badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
+                badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-[8px] mr-1"></i>Periksa Code.gs`;
+              }
+              if (timeText) {
+                timeText.textContent = `Pesan: ${result.message}`;
+              }
+
+              // Tetap render tabel dengan data yang sudah ada di penyimpanan lokal
+              this.renderTeacherTable();
+            } else {
+              this.renderTeacherTable();
+            }
+          })
+          .catch(err => {
+            console.error("Gagal mengambil data rekapitulasi:", err);
+            if (badge) {
+              badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 border border-teal-300";
+              badge.innerHTML = `<i class="fa-solid fa-database text-[8px] mr-1"></i>Penyimpanan Lokal Aktif`;
+            }
+            if (timeText) {
+              timeText.textContent = `Menggunakan data tersimpan di peramban`;
+            }
+            // Tetap render data lokal jika koneksi gagal
+            this.renderTeacherTable();
+            if (isManual) {
+              this.showSyncNotification("Menggunakan data lokal tersimpan. Silakan periksa koneksi internet atau script Google Sheets Anda.");
+            }
+          })
+          .finally(() => {
+            if (btnManual && isManual) {
+              btnManual.disabled = false;
+              if (icon) icon.className = "fa-solid fa-arrows-rotate text-xs";
             }
           });
+      },
 
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-
-          const resData = await response.json();
-          console.log("[DIMAS] Respon dari Google Apps Script (doGet):", resData);
-
-          let incomingReports = null;
-          if (Array.isArray(resData)) {
-            incomingReports = resData;
-          } else if (resData && Array.isArray(resData.reports)) {
-            incomingReports = resData.reports;
-          } else if (resData && Array.isArray(resData.data)) {
-            incomingReports = resData.data;
-          }
-
-          const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-          if (incomingReports && incomingReports.length > 0) {
-            // Normalisasi dan masukkan data ke this.reports
-            const parseScore = (status) => {
-              if (!status) return 0;
-              const s = String(status).toLowerCase();
-              if (s.includes('jamaah') || s.includes('berjamaah')) return 3;
-              if (s.includes('munfarid') || s.includes('sendiri')) return 2;
-              if (s.includes('haiz')) return 3;
-              return 0;
-            };
-
-            const formatted = incomingReports.map((item, idx) => {
-              const nama = item.namaSiswa || item.nama || `Siswa ${idx + 1}`;
-              const tgl = item.tanggal || PROGRAM_DATE_RANGE.min;
-              const kls = item.kelas || 'Kelas 1';
-              const gnd = item.gender || 'Laki-laki';
-              const sbh = item.subuh || 'Tidak Salat';
-              const zhr = item.zuhur || 'Tidak Salat';
-              const asr = item.asar || 'Tidak Salat';
-              const mgb = item.magrib || 'Tidak Salat';
-              const isy = item.isya || 'Tidak Salat';
-              const ket = item.keterangan || item.catatan || '-';
-              const poin = item.totalPoin !== undefined ? Number(item.totalPoin) : this.computeTotalScore(sbh, zhr, asr, mgb, isy);
-              const haiz = (sbh && String(sbh).includes('Haiz')) || (item.isHaiz === true);
-
-              return {
-                id: item.id || `gas_${tgl}_${nama}_${kls}`.replace(/[^a-zA-Z0-9_]/g, '_'),
-                timestamp: item.timestamp || new Date().toISOString(),
-                namaSiswa: nama,
-                nama: nama,
-                kelas: kls,
-                gender: gnd,
-                tanggal: tgl,
-                subuh: sbh,
-                subuhPoin: parseScore(sbh),
-                zuhur: zhr,
-                zuhurPoin: parseScore(zhr),
-                asar: asr,
-                asarPoin: parseScore(asr),
-                magrib: mgb,
-                magribPoin: parseScore(mgb),
-                isya: isy,
-                isyaPoin: parseScore(isy),
-                keterangan: ket,
-                catatan: ket,
-                totalPoin: poin,
-                isHaiz: haiz,
-                sekolah: SCHOOL_INFO.name,
-                source: 'google-sheets'
-              };
-            });
-
-            // Sinkronkan ke daftar lokal: gabungkan baris dari Google Sheets
-            formatted.forEach(f => {
-              const existingIdx = this.reports.findIndex(r => 
-                r.tanggal === f.tanggal && 
-                r.nama.toLowerCase() === f.nama.toLowerCase() && 
-                r.kelas === f.kelas
-              );
-              if (existingIdx >= 0) {
-                this.reports[existingIdx] = { ...this.reports[existingIdx], ...f };
-              } else {
-                this.reports.unshift(f);
-              }
-            });
-
-            this.saveReportsToStorage();
-            this.renderTeacherTable();
-
-            if (badge) {
-              badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
-              badge.innerHTML = `<i class="fa-solid fa-check text-[8px] text-emerald-600 mr-1"></i>Tersinkron (${incomingReports.length} Data)`;
-            }
-            if (timeText) {
-              timeText.textContent = `Tersinkron pukul ${nowTime} WIB (${incomingReports.length} laporan)`;
-            }
-
-            if (isManual) {
-              this.showSyncNotification(`Alhamdulillah! Berhasil menyinkronkan ${incomingReports.length} data salat dari Google Sheets.`);
-            }
-          } else if (resData && (resData.status === 'active' || resData.status === 'success')) {
-            // Endpoint aktif dan terhubung
-            if (badge) {
-              badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
-              badge.innerHTML = `<i class="fa-solid fa-circle text-[8px] text-emerald-600 mr-1 animate-pulse"></i>Web App Aktif & Terhubung`;
-            }
-            if (timeText) {
-              timeText.textContent = `Terhubung ke Google Sheets (${nowTime} WIB)`;
-            }
-            if (isManual) {
-              this.showSyncNotification("Web App Google Apps Script aktif dan terhubung ke Spreadsheet.");
-            }
-            this.renderTeacherTable();
-          } else {
-            if (badge) {
-              badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-300";
-              badge.innerHTML = `Mode Offline/Lokal`;
-            }
-            if (timeText) {
-              timeText.textContent = `Menggunakan data tersimpan di perangkat`;
-            }
-            this.renderTeacherTable();
-          }
-        } catch (error) {
-          console.warn("[DIMAS] Pengambilan data dari Google Apps Script (doGet):", error);
-          if (badge) {
-            badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 border border-teal-300";
-            badge.innerHTML = `<i class="fa-solid fa-database text-[8px] mr-1"></i>Penyimpanan Lokal Aktif`;
-          }
-          if (timeText) {
-            timeText.textContent = `Data lokal aman & siap dikirim via form`;
-          }
-          if (isManual) {
-            this.showSyncNotification("Data laporan tersimpan aman di peramban. Pengiriman form salat siswa tetap berjalan secara langsung ke Google Sheets.");
-          }
-          this.renderTeacherTable();
-        } finally {
-          if (btnManual && isManual) {
-            btnManual.disabled = false;
-            if (icon) icon.className = "fa-solid fa-arrows-rotate text-xs";
-          }
-        }
+      /**
+       * Alias fungsi untuk kompatibilitas pemanggilan sebelumnya
+       */
+      fetchReportsFromGoogleSheets(isManual = false) {
+        return this.loadAdminData(isManual);
       },
 
       computeTotalScore(sbh, zhr, asr, mgb, isy) {
@@ -2622,6 +2680,9 @@ function doGet(e) {
         }
       }
     };
+
+    window.app = app;
+    window.loadAdminData = (isManual) => app.loadAdminData(isManual);
 
     document.addEventListener('DOMContentLoaded', () => {
       app.init();
